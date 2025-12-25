@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { Button } from '../components/common/Button';
 import { IgusaChan } from '../components/character/IgusaChan';
@@ -7,6 +7,7 @@ import './stages.css';
 
 interface StageProps {
     onComplete: (score: number) => void;
+    onNextDay: () => void;
 }
 
 interface Bug {
@@ -17,9 +18,10 @@ interface Bug {
 
 type EventType = 'net' | 'bug' | 'gas' | 'typhoon' | null;
 
-export function Stage4Seicho({ onComplete }: StageProps) {
+export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
-    const [day, setDay] = useState(9);
+    // グローバルな日付を使用 (Day 9-20)
+    const day = state.currentDay;
     const [totalScore, setTotalScore] = useState(0);
     const [netHeight, setNetHeight] = useState(1);
     const [bugs, setBugs] = useState<Bug[]>([]);
@@ -53,7 +55,66 @@ export function Stage4Seicho({ onComplete }: StageProps) {
                 setBugs(newBugs);
             }
         }
-    }, [day]);
+    }, [day]); // eventSchedule is constant
+
+    // Canvas描画
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // 解像度調整
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        // 背景
+        const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
+        gradient.addColorStop(0, '#87CEEB'); // 空
+        gradient.addColorStop(0.6, '#E0F7FA');
+        gradient.addColorStop(0.6, '#4CAF50'); // 地面
+        gradient.addColorStop(1, '#1B5E20');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, rect.width, rect.height);
+
+        // い草の描画
+        const drawIgusa = () => {
+            // 成長度合い (Day 9 -> 30%, Day 20 -> 100%)
+            const growthRatio = Math.min(1, Math.max(0.3, 0.3 + (day - 9) * 0.07));
+            const baseHeight = rect.height * 0.7 * growthRatio; // 最大高さは画面の70%
+            const count = 2000; // 本数
+
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * rect.width;
+                const variance = Math.random() * 0.4 + 0.8; // 高さのばらつき
+                const h = baseHeight * variance;
+
+                // 色のばらつき
+                const green = Math.floor(100 + Math.random() * 100);
+                const color = `rgb(${Math.random() < 0.1 ? 180 : 40}, ${green}, ${Math.random() < 0.1 ? 40 : 80})`;
+
+                ctx.beginPath();
+                ctx.moveTo(x, rect.height);
+                // 少しカーブさせる
+                const curveX = x + (Math.random() - 0.5) * 10;
+                ctx.quadraticCurveTo(x, rect.height - h / 2, curveX, rect.height - h);
+
+                ctx.lineWidth = 1 + Math.random(); // 1-2px
+                ctx.strokeStyle = color;
+                ctx.globalAlpha = 0.8;
+                ctx.stroke();
+            }
+        };
+
+        drawIgusa();
+
+    }, [day]); // 再描画トリガー: 日付変更時のみ（害虫駆除で再描画しない）
 
     // 害虫をタップで駆除
     const handleBugTap = useCallback((bugId: number) => {
@@ -111,7 +172,7 @@ export function Stage4Seicho({ onComplete }: StageProps) {
         }
 
         if (day < 20) {
-            setDay(day + 1);
+            onNextDay();
             setEventHandled(false);
         } else {
             onComplete(totalScore);
@@ -123,7 +184,7 @@ export function Stage4Seicho({ onComplete }: StageProps) {
             case 'net':
                 return (
                     <div className="event-card event-net">
-                        <h3>🕸️ 網上げの時間！</h3>
+                        <h3>網上げの時間！</h3>
                         <p>い草が伸びてきたよ。網を10cm上げよう！</p>
                         <p className="net-info">現在の網の高さ: {netHeight * 10}cm</p>
                         <Button variant="primary" onClick={handleNetRaise}>
@@ -134,7 +195,7 @@ export function Stage4Seicho({ onComplete }: StageProps) {
             case 'bug':
                 return (
                     <div className="event-card event-bug">
-                        <h3>🐛 害虫発生！</h3>
+                        <h3>害虫発生！</h3>
                         <p>イグサシンムシガが出現！タップで駆除しよう！</p>
                         <div className="bug-field">
                             {bugs.map(bug => (
@@ -144,7 +205,7 @@ export function Stage4Seicho({ onComplete }: StageProps) {
                                     style={{ left: `${bug.x}%`, top: `${bug.y}%` }}
                                     onClick={() => handleBugTap(bug.id)}
                                 >
-                                    🐛
+                                    <div className="icon-bug" />
                                 </button>
                             ))}
                         </div>
@@ -157,12 +218,12 @@ export function Stage4Seicho({ onComplete }: StageProps) {
             case 'gas':
                 return (
                     <div className="event-card event-gas">
-                        <h3>💨 ガス発生！</h3>
+                        <h3>ガス発生！</h3>
                         <p>田んぼから泡が出てきた！間断かん水でガスを抜こう。</p>
                         <div className="gas-bubbles">
-                            <span className="bubble">○</span>
-                            <span className="bubble">○</span>
-                            <span className="bubble">○</span>
+                            <span className="gas-bubble"></span>
+                            <span className="gas-bubble"></span>
+                            <span className="gas-bubble"></span>
                         </div>
                         <Button variant="primary" onClick={handleGasDrain}>
                             間断かん水を行う
@@ -172,7 +233,7 @@ export function Stage4Seicho({ onComplete }: StageProps) {
             case 'typhoon':
                 return (
                     <div className="event-card event-typhoon">
-                        <h3>🌀 台風接近！</h3>
+                        <h3>台風接近！</h3>
                         <p>台風が来るよ！網を補強して備えよう。</p>
                         <Button variant="danger" onClick={handleTyphoonPrep}>
                             網を補強する
@@ -189,24 +250,20 @@ export function Stage4Seicho({ onComplete }: StageProps) {
     return (
         <div className="stage-game stage-seicho">
             <div className="game-instruction">
-                <p>📏 成長期を乗り越えよう！</p>
+                <p>成長期を乗り越えよう！</p>
                 <p className="hint">Day {day} / 20</p>
             </div>
 
             <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="medium" stage={4} />
+                <IgusaChan mood={getMoodByQP(state.qualityPoints, 4)} size="medium" stage={4} />
             </div>
 
             <div className="growth-field">
-                <div className="igusa-rows" style={{ height: `${30 + (day - 9) * 5}%` }}>
-                    🌿🌿🌿🌿🌿
-                </div>
+                <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
                 <div
                     className="net-overlay"
                     style={{ bottom: `${netHeight * 10}%` }}
-                >
-                    ═══════════
-                </div>
+                />
             </div>
 
             {currentEvent && !eventHandled ? (

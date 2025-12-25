@@ -7,6 +7,7 @@ import { getMoodByQP } from '../types/game';
 import './stages.css';
 
 interface StageProps {
+    onNextDay: () => void;
     onComplete: (score: number) => void;
 }
 
@@ -18,7 +19,7 @@ interface IgusaItem {
     quality: 'good' | 'tip' | 'uneven' | 'damaged';
 }
 
-export function Stage7Seishoku({ onComplete }: StageProps) {
+export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [phase, setPhase] = useState<Phase>('selection');
     const [igusaItems, setIgusaItems] = useState<IgusaItem[]>([]);
@@ -28,8 +29,11 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
     const [timeLeft, setTimeLeft] = useState(1.5);
     const [totalScore, setTotalScore] = useState(0);
     const [selectionScore, setSelectionScore] = useState(0);
+    const [selectionCount, setSelectionCount] = useState(0);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const targetWeaveCount = 50;
+    const targetSelectionCount = 10;
 
     // 選別用のい草を生成
     useEffect(() => {
@@ -57,10 +61,18 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
         } else {
             dispatch({ type: 'ADD_QP', amount: -5 });
         }
-        generateNewItems();
+        setSelectionCount(prev => prev + 1);
+
+        if (selectionCount + 1 >= targetSelectionCount) {
+            // 選別終了、自動的に織りフェーズへ
+            setTotalScore(selectionScore);
+            setPhase('weaving');
+        } else {
+            generateNewItems();
+        }
     };
 
-    // 選別完了
+    // 選別完了（手動）
     const handleSelectionComplete = () => {
         setTotalScore(selectionScore);
         setPhase('weaving');
@@ -68,13 +80,18 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
 
     // 織り込みタイマー
     useEffect(() => {
-        if (phase !== 'weaving') return;
+        if (phase !== 'weaving' || weavingCount >= targetWeaveCount || isProcessing) return;
 
         const interval = setInterval(() => {
             setTimeLeft(prev => {
-                if (prev <= 0) {
-                    // タイムアウト - Miss
-                    handleWeaveResult('miss');
+                if (prev <= 0.1) {
+                    // タイムアウト - Miss処理
+                    setIsProcessing(true);
+                    dispatch({ type: 'ADD_QP', amount: -1 });
+                    setDensity(d => Math.max(0, d - 1));
+                    setWeavingCount(c => c + 1);
+                    setCurrentDirection(d => d === 'left' ? 'right' : 'left');
+                    setTimeout(() => setIsProcessing(false), 100);
                     return 1.5;
                 }
                 return prev - 0.1;
@@ -82,63 +99,60 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
         }, 100);
 
         return () => clearInterval(interval);
-    }, [phase, currentDirection]);
+    }, [phase, weavingCount, isProcessing, dispatch]);
 
-    // スワイプ結果
-    const handleWeaveResult = (result: 'perfect' | 'good' | 'miss') => {
+    // スワイプ処理
+    const handleSwipe = (direction: Direction) => {
+        if (isProcessing || weavingCount >= targetWeaveCount) return;
+        setIsProcessing(true);
+
         let qp = 0;
         let densityChange = 0;
 
-        switch (result) {
-            case 'perfect':
+        if (direction === currentDirection) {
+            if (timeLeft > 1) {
+                // Perfect
                 qp = 2;
-                densityChange = 3;
-                break;
-            case 'good':
+                densityChange = 2; // 増加量を減らす (3 -> 2)
+            } else {
+                // Good
                 qp = 1;
-                densityChange = 2;
-                break;
-            case 'miss':
-                qp = -1;
-                densityChange = -1;
-                break;
+                densityChange = 1; // 増加量を減らす (2 -> 1)
+            }
+        } else {
+            // Miss
+            qp = -1;
+            densityChange = -2; // 減少量を増やす (-1 -> -2)
         }
 
         dispatch({ type: 'ADD_QP', amount: qp });
         setTotalScore(prev => prev + Math.max(0, qp));
-        setDensity(prev => Math.min(100, Math.max(0, prev + densityChange)));
+        setDensity(prev => Math.min(150, Math.max(0, prev + densityChange)));
         setWeavingCount(prev => prev + 1);
         setCurrentDirection(prev => prev === 'left' ? 'right' : 'left');
         setTimeLeft(1.5);
-    };
 
-    // スワイプ処理
-    const handleSwipe = (direction: Direction) => {
-        if (direction === currentDirection) {
-            if (timeLeft > 1) {
-                handleWeaveResult('perfect');
-            } else {
-                handleWeaveResult('good');
-            }
-        } else {
-            handleWeaveResult('miss');
-        }
+        setTimeout(() => setIsProcessing(false), 100);
     };
 
     const getQualityLabel = (quality: IgusaItem['quality']) => {
         switch (quality) {
-            case 'good': return '🌿 良品';
-            case 'tip': return '🔺 穂先残り';
-            case 'uneven': return '🟡 色ムラ';
-            case 'damaged': return '❌ 傷あり';
+            case 'good': return '良品';
+            case 'tip': return '穂先残り';
+            case 'uneven': return '色ムラ';
+            case 'damaged': return '傷あり';
         }
     };
 
     const getIgusaByCount = () => {
-        if (density >= 90) return '約8000本';
-        if (density >= 70) return '約6000本';
-        if (density >= 50) return '約4000本';
-        return '4000本未満';
+        // 密度(%)から本数を計算（最大約8000本）
+        // density 50(初期) -> 6000本
+        // desnity 100(MAX) -> 8000本
+        // density 0 -> 4000本以下
+        const base = 4000;
+        const additional = Math.floor((density / 100) * 4000);
+        const count = base + additional;
+        return `${count.toLocaleString()}本`;
     };
 
     const isComplete = weavingCount >= targetWeaveCount;
@@ -146,7 +160,7 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
     return (
         <div className="stage-game stage-seishoku">
             <div className="game-instruction">
-                <p>🧵 {phase === 'selection' ? 'い草を選別しよう！' : '畳表を織ろう！'}</p>
+                <p>{phase === 'selection' ? 'い草を選別しよう！' : '畳表を織ろう！'}</p>
                 <p className="hint">
                     {phase === 'selection'
                         ? '良品質のい草を選んでタップ'
@@ -156,7 +170,7 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
             </div>
 
             <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="small" stage={7} />
+                <IgusaChan mood={getMoodByQP(state.qualityPoints, 7)} size="small" stage={7} />
             </div>
 
             {phase === 'selection' ? (
@@ -168,7 +182,7 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
                                 className={`igusa-item quality-${item.quality}`}
                                 onClick={() => handleSelect(item)}
                             >
-                                <span className="igusa-visual">🌿</span>
+                                <div className={`quality-indicator ${item.quality}`} />
                                 <span className="igusa-label">{getQualityLabel(item.quality)}</span>
                             </button>
                         ))}
@@ -190,7 +204,11 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
                         <div className="loom">
                             <div className="warp-threads">═══════════════</div>
                             <div className={`weave-indicator ${currentDirection}`}>
-                                {currentDirection === 'left' ? '← 🌿' : '🌿 →'}
+                                {currentDirection === 'left' ? (
+                                    <>← <div className="weave-indicator-icon" /></>
+                                ) : (
+                                    <><div className="weave-indicator-icon" /> →</>
+                                )}
                             </div>
                             <div className="warp-threads">═══════════════</div>
                         </div>
@@ -204,7 +222,7 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
                     <ProgressBar
                         value={timeLeft}
                         max={1.5}
-                        label="⏱️"
+                        label="残り時間"
                         color={timeLeft > 1 ? 'success' : timeLeft > 0.5 ? 'warning' : 'danger'}
                     />
 
@@ -240,7 +258,7 @@ export function Stage7Seishoku({ onComplete }: StageProps) {
                 </div>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">🎉 製織完了！</p>
+                    <p className="complete-message">製織完了！</p>
                     <p>密度: {density}%（{getIgusaByCount()}）</p>
                     <p>スコア: {totalScore} QP</p>
                     {density >= 90 && (

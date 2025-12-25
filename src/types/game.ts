@@ -89,6 +89,7 @@ export type CharacterMood = 'excellent' | 'happy' | 'normal' | 'sad';
 export type GameAction =
     | { type: 'START_GAME'; variety?: IgusaVariety }
     | { type: 'NEXT_DAY' }
+    | { type: 'JUMP_TO_DAY'; day: number }
     | { type: 'ADD_QP'; amount: number }
     | { type: 'COMPLETE_STAGE'; stage: StageType; score: number }
     | { type: 'ANSWER_QUIZ'; correct: boolean }
@@ -115,10 +116,33 @@ export function getStageByDay(day: number): StageInfo {
 }
 
 // QPからキャラクターの気分を取得
-export function getMoodByQP(qp: number): CharacterMood {
-    if (qp >= 120) return 'excellent';
-    if (qp >= 90) return 'happy';
-    if (qp >= 60) return 'normal';
+// QPからキャラクターの気分を取得
+export function getMoodByQP(qp: number, stage: number = 1): CharacterMood {
+    // ステージ終了時点での目安QP
+    const thresholds: Record<number, number> = {
+        1: 100, // 株分け
+        2: 150, // 植え付け
+        3: 250, // 先刈り
+        4: 350, // 成長期
+        5: 450, // 収穫
+        6: 550, // 泥染め
+        7: 650, // 製織
+        8: 450  // 検査 (最終評価): Aランクライン(450)以上ならHappyにする
+    };
+
+    const target = thresholds[stage] || 200;
+
+    // Stage8（最終）は閾値調整を緩める
+    if (stage === 8) {
+        if (qp >= 550) return 'excellent'; // Sランク
+        if (qp >= 450) return 'happy';     // Aランク
+        if (qp >= 350) return 'normal';    // Bランク
+        return 'sad';
+    }
+
+    if (qp >= target + 50) return 'excellent';
+    if (qp >= target) return 'happy';
+    if (qp >= target - 50) return 'normal';
     return 'sad';
 }
 
@@ -126,11 +150,19 @@ export function getMoodByQP(qp: number): CharacterMood {
 export type FinalRank = 'S' | 'A' | 'B' | 'C' | 'D';
 
 export function getFinalRank(qp: number): FinalRank {
-    if (qp >= 150) return 'S';
-    if (qp >= 120) return 'A';
-    if (qp >= 90) return 'B';
-    if (qp >= 60) return 'C';
+    if (qp >= 550) return 'S';
+    if (qp >= 450) return 'A';
+    if (qp >= 350) return 'B';
+    if (qp >= 200) return 'C';
     return 'D';
+}
+
+export function getNextStageStartDay(currentStage: StageType): number {
+    const currentIndex = STAGES.findIndex(s => s.type === currentStage);
+    if (currentIndex === -1 || currentIndex === STAGES.length - 1) {
+        return 30; // 最終日またはエラー
+    }
+    return STAGES[currentIndex + 1].dayRange[0];
 }
 
 // 初期状態

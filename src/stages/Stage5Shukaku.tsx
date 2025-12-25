@@ -7,6 +7,7 @@ import { getMoodByQP } from '../types/game';
 import './stages.css';
 
 interface StageProps {
+    onNextDay: () => void;
     onComplete: (score: number) => void;
 }
 
@@ -20,11 +21,10 @@ interface FlyingIgusa {
 
 type TimeOfDay = 'morning' | 'noon' | 'evening';
 
-export function Stage5Shukaku({ onComplete }: StageProps) {
+export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [timeOfDay, setTimeOfDay] = useState<TimeOfDay | null>(null);
     const [igusas, setIgusas] = useState<FlyingIgusa[]>([]);
-    const [waterLevel, setWaterLevel] = useState(100);
     const [score, setScore] = useState(0);
     const [cutCount, setCutCount] = useState(0);
     const [comboCount, setComboCount] = useState(0);
@@ -55,17 +55,17 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
         if (!gameActive) return;
 
         const interval = setInterval(() => {
-            if (igusas.length < 8) {
+            if (igusas.length < 15) { // Increase max concurrent to 15
                 const newIgusa: FlyingIgusa = {
                     id: Date.now() + Math.random(),
                     x: 10 + Math.random() * 80,
                     y: 100,
-                    isGood: Math.random() > 0.2, // 80%が良品
+                    isGood: Math.random() > 0.2,
                     isCut: false,
                 };
                 setIgusas(prev => [...prev, newIgusa]);
             }
-        }, 500);
+        }, 300); // Accelerate spawn rate to 300ms
 
         return () => clearInterval(interval);
     }, [gameActive, igusas.length]);
@@ -80,9 +80,6 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
                     .map(ig => ({ ...ig, y: ig.y - 2 }))
                     .filter(ig => ig.y > -10 && !ig.isCut)
             );
-
-            // 水かけゲージ減少
-            setWaterLevel(prev => Math.max(0, prev - 0.5));
         }, 50);
 
         return () => clearInterval(interval);
@@ -130,17 +127,14 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
         }
     }, [gameActive, dispatch]);
 
-    // 水かけ
-    const handleWater = () => {
-        setWaterLevel(prev => Math.min(100, prev + 30));
-    };
+
 
     const isComplete = !gameActive && timeOfDay !== null;
 
     return (
         <div className="stage-game stage-shukaku">
             <div className="game-instruction">
-                <p>🌾 い草を刈り取ろう！</p>
+                <p>い草を刈り取ろう！</p>
                 {!timeOfDay ? (
                     <p className="hint">まず収穫する時間帯を選ぼう</p>
                 ) : (
@@ -149,7 +143,7 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
             </div>
 
             <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="small" stage={5} />
+                <IgusaChan mood={getMoodByQP(state.qualityPoints, 5)} size="small" stage={5} />
             </div>
 
             {!timeOfDay ? (
@@ -157,17 +151,17 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
                     <h3>【時間帯を選んでください】</h3>
                     <div className="time-options">
                         <button className="time-option" onClick={() => handleTimeSelect('morning')}>
-                            <span className="time-icon">🌅</span>
+                            <div className="icon-time morning" />
                             <span className="time-label">早朝</span>
                             <span className="time-bonus">+10 QP</span>
                         </button>
                         <button className="time-option noon" onClick={() => handleTimeSelect('noon')}>
-                            <span className="time-icon">🌞</span>
+                            <div className="icon-time noon" />
                             <span className="time-label">昼間</span>
                             <span className="time-penalty">-15 QP</span>
                         </button>
                         <button className="time-option" onClick={() => handleTimeSelect('evening')}>
-                            <span className="time-icon">🌇</span>
+                            <div className="icon-time evening" />
                             <span className="time-label">夕方</span>
                             <span className="time-bonus">+10 QP</span>
                         </button>
@@ -176,9 +170,9 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
             ) : gameActive ? (
                 <>
                     <div className="harvest-header">
-                        <span>⏱️ {gameTime}秒</span>
-                        <span>🌾 {cutCount}</span>
-                        <span>🔥 {comboCount}コンボ</span>
+                        <span>時間: {gameTime}秒</span>
+                        <span>収穫: {cutCount}</span>
+                        <span>コンボ: {comboCount}</span>
                     </div>
 
                     <div className="harvest-field">
@@ -189,26 +183,16 @@ export function Stage5Shukaku({ onComplete }: StageProps) {
                                 style={{ left: `${igusa.x}%`, bottom: `${igusa.y}%` }}
                                 onClick={() => handleCut(igusa)}
                             >
-                                {igusa.isGood ? '🌾' : '🥀'}
+                                <div className={`icon-stalk ${igusa.isGood ? 'good' : 'bad'}`} />
                             </button>
                         ))}
                     </div>
 
-                    <div className="water-gauge-area">
-                        <ProgressBar
-                            value={waterLevel}
-                            max={100}
-                            label="💧 水かけ"
-                            color={waterLevel < 30 ? 'danger' : waterLevel < 60 ? 'warning' : 'primary'}
-                        />
-                        <Button variant="primary" size="small" onClick={handleWater}>
-                            水をかける
-                        </Button>
-                    </div>
+
                 </>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">🎉 収穫完了！</p>
+                    <p className="complete-message">収穫完了！</p>
                     <p>刈り取り: {cutCount}本</p>
                     <p>最大コンボ: {maxCombo}</p>
                     <p>スコア: {score} QP</p>

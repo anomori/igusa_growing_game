@@ -1,173 +1,48 @@
-.igusa-chan {
+/* IgusaChan V2 - Bundle with face at base */
+
+.igusa-chan-v2 {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-}
-
-/* サイズ */
-.igusa-small {
-    transform: scale(0.6);
-}
-
-.igusa-medium {
-    transform: scale(1);
-}
-
-.igusa-large {
-    transform: scale(1.5);
-}
-
-/* 成長段階 */
-.igusa-body {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.growth-seedling .igusa-leaves {
-    height: 40px;
-}
-
-.growth-young .igusa-leaves {
-    height: 60px;
-}
-
-.growth-mature .igusa-leaves {
-    height: 80px;
-}
-
-/* 葉っぱ */
-.igusa-leaves {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 2px;
-}
-
-.igusa-leaf {
-    width: 8px;
-    background: linear-gradient(to top, #4CAF50, #81C784);
-    border-radius: 4px 4px 0 0;
-    position: relative;
-}
-
-.leaf-left {
-    height: 85%;
-    transform: rotate(-10deg);
-}
-
-.leaf-center {
-    height: 100%;
-}
-
-.leaf-right {
-    height: 85%;
-    transform: rotate(10deg);
-}
-
-/* 顔 */
-.igusa-face {
-    width: 60px;
-    height: 50px;
-    background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.igusa-eyes {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 4px;
-}
-
-.igusa-eye {
-    font-size: 14px;
-    color: #2E2E2E;
-}
-
-.igusa-mouth {
-    font-size: 16px;
-    color: #2E2E2E;
-}
-
-/* 頬紅 */
-.igusa-blush {
-    position: absolute;
-    width: 10px;
-    height: 6px;
-    background: rgba(244, 143, 177, 0.5);
-    border-radius: 50%;
-    top: 50%;
-}
-
-.blush-left {
-    left: 8px;
-}
-
-.blush-right {
-    right: 8px;
-}
-
-/* 気分による変化 */
-.mood-excellent .igusa-face {
-    background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
-}
-
-.mood-sad .igusa-face {
-    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-    opacity: 0.8;
-}
-
-.mood-sad .igusa-leaf {
-    opacity: 0.7;
+    animation: gentleSway 3s ease-in-out infinite;
 }
 
 /* 輝きエフェクト */
-.igusa-sparkles {
+.igusa-sparkles-v2 {
     position: absolute;
     width: 100%;
     height: 100%;
     pointer-events: none;
 }
 
-.sparkle {
+.igusa-sparkles-v2 .sparkle {
     position: absolute;
     color: gold;
-    font-size: 16px;
+    font-size: 14px;
     animation: sparkle 1.5s infinite;
 }
 
-.sparkle:nth-child(1) {
-    top: 0;
+.igusa-sparkles-v2 .sparkle:nth-child(1) {
+    top: 5px;
     left: 10px;
     animation-delay: 0s;
 }
 
-.sparkle:nth-child(2) {
+.igusa-sparkles-v2 .sparkle:nth-child(2) {
     top: 20px;
     right: 5px;
     animation-delay: 0.5s;
 }
 
-.sparkle:nth-child(3) {
-    bottom: 10px;
+.igusa-sparkles-v2 .sparkle:nth-child(3) {
+    bottom: 30px;
     left: 50%;
     animation-delay: 1s;
 }
 
 /* アニメーション */
-.igusa-chan {
-    animation: gentleSway 3s ease-in-out infinite;
-}
-
 @keyframes gentleSway {
 
     0%,
@@ -180,14 +55,26 @@
     }
 }
 
-.igusa-small {
-    animation: gentleSway 3s ease-in-out infinite;
+@keyframes sparkle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
 }
 
-.igusa-medium {
-    animation: gentleSway 3s ease-in-out infinite;
+/* 気分による変化 */
+.mood-excellent .igusa-face-v2 {
+    background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%) !important;
 }
 
-.igusa-large {
-    animation: gentleSway 3s ease-in-out infinite;
+.mood-sad .igusa-face-v2 {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%) !important;
+    opacity: 0.85;
 }

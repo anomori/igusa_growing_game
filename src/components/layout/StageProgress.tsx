@@ -1,3 +1,4 @@
+import { StatusIcon } from '../common/StatusIcon';
 import { STAGES, StageType } from '../../types/game';
 import { useGame } from '../../context/GameContext';
 import './StageProgress.css';
@@ -26,7 +27,7 @@ export function StageProgress() {
                     return (
                         <div key={stage.type} className="stage-item-wrapper">
                             <div className={`stage-item stage-${status}`}>
-                                <span className="stage-icon">{stage.icon}</span>
+                                <StatusIcon type={stage.type} size={24} />
                             </div>
                             {index < STAGES.length - 1 && (
                                 <div className={`stage-connector ${status === 'completed' ? 'completed' : ''}`} />

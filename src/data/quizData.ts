@@ -14,7 +14,7 @@ export const quizData: Quiz[] = [
         id: 'effect_02',
         category: 'effect',
         question: '畳が持つ湿度を調整する機能は何と呼ばれる？',
-        options: ['断熱効果', '調湿効果', '遮音効果', '防虫効果'],
+        options: ['断熱効果', '調湿効果', '加湿効果', '防虫効果'],
         correctIndex: 1,
         explanation: '畳は湿気を吸収したり放出したりする「調湿効果」があります。梅雨時は湿気を吸い、乾燥時は放出してくれます。',
     },
@@ -30,9 +30,9 @@ export const quizData: Quiz[] = [
         id: 'effect_04',
         category: 'effect',
         question: '畳が音を吸収する効果は何と呼ばれる？',
-        options: ['防音効果', '吸音効果', '遮音効果', '消音効果'],
-        correctIndex: 2,
-        explanation: '畳は遮音効果があり、足音や物音を和らげてくれます。マンションでの生活音対策にも効果的です。',
+        options: ['防音効果', '吸音効果', '反響効果', '消音効果'],
+        correctIndex: 1,
+        explanation: '畳には多くの空気が含まれており、音を吸収する「吸音効果」があります。また、音を遮る「遮音効果」も併せ持ち、生活音を和らげてくれます。',
     },
 
     // い草の知識
@@ -42,7 +42,7 @@ export const quizData: Quiz[] = [
         question: 'い草の国内生産量1位の都道府県はどこ？',
         options: ['福岡県', '熊本県', '大分県', '佐賀県'],
         correctIndex: 1,
-        explanation: '熊本県が国内い草生産量の85%以上を占めています。特に八代市が有名な産地です。',
+        explanation: '熊本県が国内い草生産量の約9割を占めています。特に八代市が有名な産地です。',
     },
     {
         id: 'knowledge_02',

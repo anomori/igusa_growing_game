@@ -14,10 +14,12 @@ import { Stage5Shukaku } from './stages/Stage5Shukaku';
 import { Stage6Dorozome } from './stages/Stage6Dorozome';
 import { Stage7Seishoku } from './stages/Stage7Seishoku';
 import { Stage8Kensa } from './stages/Stage8Kensa';
-import { getMoodByQP, getStageByDay, getFinalRank, STAGES } from './types/game';
+import { TitleVisual } from './components/title/TitleVisual';
+import { StatusIcon } from './components/common/StatusIcon';
+import { getMoodByQP, getStageByDay, getFinalRank, getNextStageStartDay, STAGES } from './types/game';
 import { getQuizForStage } from './data/quizData';
 import { getHintForStage } from './data/hintsData';
-import { badgeDefinitions } from './data/badgesData';
+import { clearGameState } from './utils/storage';
 import './App.css';
 
 type GameScreen = 'title' | 'game' | 'results';
@@ -47,9 +49,11 @@ function GameContent() {
 
     // ゲーム開始
     const handleStartGame = () => {
+        clearGameState(); // 保存データをクリア
         dispatch({ type: 'START_GAME' });
         setScreen('game');
         setShowHint(true);
+        setPreviousStage('kabuwake');
     };
 
     // ゲーム継続
@@ -86,8 +90,22 @@ function GameContent() {
         if (state.currentStage === 'kensa') {
             setScreen('results');
         } else {
-            // 次の日へ進む
-            handleNextDay();
+            // 次のステージの開始日までスキップ
+            const nextStartDay = getNextStageStartDay(state.currentStage);
+            const targetDay = nextStartDay > state.currentDay ? nextStartDay : state.currentDay + 1;
+
+            dispatch({ type: 'JUMP_TO_DAY', day: targetDay });
+
+            const nextStageInfo = getStageByDay(targetDay);
+            if (nextStageInfo.type !== state.currentStage) {
+                // クイズ更新
+                const nextStageIdx = STAGES.findIndex(s => s.type === nextStageInfo.type);
+                if (nextStageIdx !== -1) {
+                    setCurrentQuiz(getQuizForStage(nextStageIdx));
+                }
+            }
+
+            setStageCompleted(false);
         }
     };
 
@@ -100,31 +118,39 @@ function GameContent() {
 
     // リセット
     const handleReset = () => {
+        clearGameState(); // 保存データをクリア
         dispatch({ type: 'RESET_GAME' });
         setScreen('title');
         setStageCompleted(false);
         setPreviousStage('kabuwake');
+        setShowQuiz(false);
+        setShowHint(false);
     };
 
     // 現在のステージコンポーネントを取得
     const renderStage = () => {
+        const commonProps = {
+            onComplete: handleStageComplete,
+            onNextDay: handleNextDay
+        };
+
         switch (state.currentStage) {
             case 'kabuwake':
-                return <Stage1Kabuwake onComplete={handleStageComplete} />;
+                return <Stage1Kabuwake {...commonProps} />;
             case 'uetsuke':
-                return <Stage2Uetsuke onComplete={handleStageComplete} />;
+                return <Stage2Uetsuke {...commonProps} />;
             case 'sakigari':
-                return <Stage3Sakigari onComplete={handleStageComplete} />;
+                return <Stage3Sakigari {...commonProps} />;
             case 'seicho':
-                return <Stage4Seicho onComplete={handleStageComplete} />;
+                return <Stage4Seicho {...commonProps} />;
             case 'shukaku':
-                return <Stage5Shukaku onComplete={handleStageComplete} />;
+                return <Stage5Shukaku {...commonProps} />;
             case 'dorozome':
-                return <Stage6Dorozome onComplete={handleStageComplete} />;
+                return <Stage6Dorozome {...commonProps} />;
             case 'seishoku':
-                return <Stage7Seishoku onComplete={handleStageComplete} />;
+                return <Stage7Seishoku {...commonProps} />;
             case 'kensa':
-                return <Stage8Kensa onComplete={handleStageComplete} />;
+                return <Stage8Kensa {...commonProps} />;
             default:
                 return null;
         }
@@ -138,8 +164,8 @@ function GameContent() {
             {/* タイトル画面 */}
             {screen === 'title' && (
                 <div className="title-screen">
-                    <div className="title-character">🌱</div>
-                    <h1>い草ちゃん育成ゲーム</h1>
+                    <TitleVisual />
+                    <h1>い草育成ゲーム</h1>
                     <p className="subtitle">畳の知識を学びながら<br />い草を育てよう！</p>
 
                     <div className="title-buttons">
@@ -148,7 +174,7 @@ function GameContent() {
                         </Button>
                         {state.currentDay > 1 && (
                             <Button variant="secondary" size="large" fullWidth onClick={handleContinueGame}>
-                                📂 続きから（Day {state.currentDay}）
+                                📂 続きから（{state.currentDay}）
                             </Button>
                         )}
                     </div>
@@ -157,6 +183,7 @@ function GameContent() {
                         <p>🎮 8つのステージ</p>
                         <p>📚 畳クイズで知識UP</p>
                         <p>⏱️ 約30分でクリア</p>
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>Version 1.1 (Canvas Update)</p>
                     </div>
                 </div>
             )}
@@ -170,7 +197,10 @@ function GameContent() {
                     <div className="game-main">
                         <div className="stage-container">
                             <div className="stage-header">
-                                <h2>{currentStageInfo.icon} {currentStageInfo.name}</h2>
+                                <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <StatusIcon type={currentStageInfo.type} size={40} />
+                                    {currentStageInfo.name}
+                                </h2>
                                 <p className="stage-description">{currentStageInfo.description}</p>
                             </div>
 
@@ -184,7 +214,7 @@ function GameContent() {
                     {stageCompleted && state.currentStage !== 'kensa' && (
                         <div className="skip-button-area">
                             <Button variant="success" fullWidth onClick={handleNextDay}>
-                                ☀️ 次の日へ → Day {Math.min(state.currentDay + 1, 30)}
+                                ☀️ 次の日へ → {Math.min(state.currentDay + 1, 30)}
                             </Button>
                         </div>
                     )}
@@ -194,7 +224,7 @@ function GameContent() {
             {/* 結果画面 */}
             {screen === 'results' && (
                 <div className={`results-screen rank-${finalRank.toLowerCase()}`}>
-                    <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="large" stage={8} />
+                    <IgusaChan mood={getMoodByQP(state.qualityPoints, 8)} size="large" stage={8} />
 
                     <div className={`results-rank rank-${finalRank.toLowerCase()}`}>
                         {finalRank}
@@ -229,8 +259,8 @@ function GameContent() {
                     </div>
 
                     <div className="title-buttons">
-                        <Button variant="primary" size="large" fullWidth onClick={handleReset}>
-                            🔄 もう一度遊ぶ
+                        <Button variant="secondary" size="large" fullWidth onClick={handleReset}>
+                            🏠 タイトルへ戻る
                         </Button>
                     </div>
                 </div>

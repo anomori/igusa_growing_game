@@ -1,11 +1,12 @@
 import { useGame } from '../../context/GameContext';
-import { getStageByDay, getMoodByQP } from '../../types/game';
+import { getStageByDay, getMoodByQP, STAGES } from '../../types/game';
 import './StatusBar.css';
 
 export function StatusBar() {
     const { state } = useGame();
     const currentStageInfo = getStageByDay(state.currentDay);
-    const mood = getMoodByQP(state.qualityPoints);
+    const stageIndex = STAGES.findIndex(s => s.type === state.currentStage) + 1;
+    const mood = getMoodByQP(state.qualityPoints, stageIndex);
 
     const getMoodEmoji = () => {
         switch (mood) {
@@ -30,7 +31,7 @@ export function StatusBar() {
                 <span className="status-stage">（{currentStageInfo.name}）</span>
             </div>
             <div className="status-center">
-                <span className="status-day">Day {state.currentDay}/30</span>
+                <span className="status-day">{state.currentDay}/30</span>
             </div>
             <div className="status-right">
                 <span className={`status-qp qp-${getQPColor()}`}>

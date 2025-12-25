@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { Button } from '../components/common/Button';
 import { IgusaChan } from '../components/character/IgusaChan';
@@ -6,6 +6,7 @@ import { getMoodByQP, getFinalRank } from '../types/game';
 import './stages.css';
 
 interface StageProps {
+    onNextDay: () => void;
     onComplete: (score: number) => void;
 }
 
@@ -16,7 +17,7 @@ interface Defect {
     found: boolean;
 }
 
-export function Stage8Kensa({ onComplete }: StageProps) {
+export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [defects] = useState<Defect[]>(() => {
         // ランダムに5-8個の欠陥を配置
@@ -31,6 +32,14 @@ export function Stage8Kensa({ onComplete }: StageProps) {
     const [foundDefects, setFoundDefects] = useState<number[]>([]);
     const [wrongClicks, setWrongClicks] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
+    const [canComplete, setCanComplete] = useState(false);
+
+    // 開始直後の誤操作防止
+    useEffect(() => {
+        // 1秒後に操作可能にするが、完了ボタンは傷を見つけるまで押せないようにする
+        const timer = setTimeout(() => setCanComplete(true), 1000);
+        return () => clearTimeout(timer);
+    }, []);
 
     // 欠陥をタップ
     const handleDefectClick = (defectId: number) => {
@@ -43,7 +52,8 @@ export function Stage8Kensa({ onComplete }: StageProps) {
     // 間違いクリック
     const handleWrongClick = () => {
         setWrongClicks(prev => prev + 1);
-        dispatch({ type: 'ADD_QP', amount: -1 });
+        // ペナルティ削除：誤クリックでの減点はストレスになるため廃止
+        // dispatch({ type: 'ADD_QP', amount: -1 });
     };
 
     // 検査完了
@@ -69,8 +79,8 @@ export function Stage8Kensa({ onComplete }: StageProps) {
 
     const getRankMessage = () => {
         switch (finalRank) {
-            case 'S': return '✨ 最高級！い草の長さ・色・光沢すべて完璧！';
-            case 'A': return '⭐ 高品質！5年後も明るい飴色に変化します';
+            case 'S': return '最高級！い草の長さ・色・光沢すべて完璧！';
+            case 'A': return '高品質！5年後も明るい飴色に変化します';
             case 'B': return '標準品質。若干の黒筋がありますが使用には問題なし';
             case 'C': return '色ムラあり。耐久性は低めです';
             case 'D': return '規格外...出荷不可です。もう一度挑戦しよう！';
@@ -80,14 +90,14 @@ export function Stage8Kensa({ onComplete }: StageProps) {
     return (
         <div className="stage-game stage-kensa">
             <div className="game-instruction">
-                <p>🔍 畳表の傷を見つけよう！</p>
+                <p>畳表の傷を見つけよう！</p>
                 <p className="hint">傷や欠陥をタップしてマーキング</p>
             </div>
 
             {!isComplete ? (
                 <>
                     <div className="character-display">
-                        <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="small" stage={8} />
+                        <IgusaChan mood={getMoodByQP(state.qualityPoints, 8)} size="small" stage={8} />
                     </div>
 
                     <div
@@ -114,18 +124,30 @@ export function Stage8Kensa({ onComplete }: StageProps) {
                                         handleDefectClick(defect.id);
                                     }}
                                 >
-                                    {foundDefects.includes(defect.id) ? '✓' : ''}
+                                    {foundDefects.includes(defect.id) ? <div className="icon-check" /> : ''}
                                 </button>
                             ))}
                         </div>
                     </div>
 
+
+
                     <div className="inspection-info">
                         <p>発見した傷: {foundDefects.length} / {defects.length}</p>
                         <p>誤クリック: {wrongClicks}回</p>
+                        {foundDefects.length < 3 && (
+                            <p className="text-warning" style={{ fontSize: '12px' }}>
+                                ※あと{3 - foundDefects.length}個見つけて！
+                            </p>
+                        )}
                     </div>
 
-                    <Button variant="success" fullWidth onClick={handleComplete}>
+                    <Button
+                        variant="success"
+                        fullWidth
+                        onClick={handleComplete}
+                        disabled={!canComplete || foundDefects.length < 3}
+                    >
                         検査完了
                     </Button>
                 </>
@@ -152,7 +174,7 @@ export function Stage8Kensa({ onComplete }: StageProps) {
 
                     <div className="tatami-preview">
                         <div className={`finished-tatami rank-${finalRank.toLowerCase()}`}>
-                            🏠 完成した畳表
+                            完成した畳表
                         </div>
                     </div>
 

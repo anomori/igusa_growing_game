@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { Button } from '../components/common/Button';
 import { ProgressBar } from '../components/common/ProgressBar';
@@ -7,12 +7,13 @@ import { getMoodByQP } from '../types/game';
 import './stages.css';
 
 interface StageProps {
+    onNextDay: () => void;
     onComplete: (score: number) => void;
 }
 
 type Phase = 'dyeing' | 'drying';
 
-export function Stage6Dorozome({ onComplete }: StageProps) {
+export function Stage6Dorozome({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [phase, setPhase] = useState<Phase>('dyeing');
     const [mudLevel, setMudLevel] = useState(0);
@@ -20,6 +21,12 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
     const [temperature, setTemperature] = useState(65);
     const [dryingTime, setDryingTime] = useState(0);
     const [totalScore, setTotalScore] = useState(0);
+    const [isCompleted, setIsCompleted] = useState(false);
+
+    const temperatureRef = useRef(temperature);
+    useEffect(() => {
+        temperatureRef.current = temperature;
+    }, [temperature]);
 
     const targetMudLevel = 50;
     const targetTempMin = 60;
@@ -39,7 +46,7 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
 
     // 温度の自然変動
     useEffect(() => {
-        if (phase !== 'drying') return;
+        if (phase !== 'drying' || isCompleted) return;
 
         const interval = setInterval(() => {
             setTemperature(prev => {
@@ -50,18 +57,73 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
         }, 500);
 
         return () => clearInterval(interval);
-    }, [phase]);
+    }, [phase, isCompleted]);
 
     // 乾燥時間カウント
     useEffect(() => {
-        if (phase !== 'drying') return;
+        if (phase !== 'drying' || isCompleted) return;
 
         const interval = setInterval(() => {
             setDryingTime(prev => prev + 1);
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [phase]);
+    }, [phase, isCompleted]);
+
+    // 自動終了の監視
+    useEffect(() => {
+        if (phase === 'drying' && dryingTime >= targetDryingTime && !isCompleted) {
+            handleDryComplete();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dryingTime, phase, isCompleted]);
+
+
+
+    // 温度範囲外のペナルティ監視
+    // タイマーIDを保持するためのRef
+    const timerRef = useRef<number | null>(null);
+
+    // 温度範囲外のペナルティ監視
+    useEffect(() => {
+        if (phase !== 'drying' || isCompleted) return;
+
+        let outOfRangeTime = 0;
+        let inRangeTime = 0;
+        const checkInterval = 100; // 0.1秒
+
+        // 既存のタイマーがあればクリア
+        if (timerRef.current) clearInterval(timerRef.current);
+
+        timerRef.current = window.setInterval(() => {
+            const currentTemp = temperatureRef.current;
+            if (currentTemp < targetTempMin || currentTemp > targetTempMax) {
+                outOfRangeTime += checkInterval;
+                inRangeTime = 0; // Reset bonus timer
+                // 500ms (0.5秒) 以上経過したらペナルティ
+                if (outOfRangeTime >= 500) {
+                    dispatch({ type: 'ADD_QP', amount: -2 }); // 気づきやすいように-2に増やす
+                    outOfRangeTime = 0; // リセット
+                }
+            } else {
+                outOfRangeTime = 0; // Reset penalty timer
+
+                // 範囲内ならボーナスタイマー加算
+                inRangeTime += checkInterval;
+                if (inRangeTime >= 1000) { // 1秒継続
+                    dispatch({ type: 'ADD_QP', amount: 2 }); // ボーナス
+                    inRangeTime = 0; // リセット
+                }
+            }
+        }, checkInterval);
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, [phase, isCompleted, dispatch]);
 
     // 泥染め完了
     const handleDyeComplete = () => {
@@ -87,21 +149,25 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
 
     // 乾燥完了
     const handleDryComplete = () => {
+        if (isCompleted) return;
+        setIsCompleted(true);
+
         let score = 0;
         const tempOk = temperature >= targetTempMin && temperature <= targetTempMax;
-        const timeOk = dryingTime >= targetDryingTime;
 
-        if (tempOk && timeOk) {
+        if (tempOk) {
             score = 5;
-        } else if (tempOk || timeOk) {
-            score = 2;
         } else {
-            score = -15;
+            score = -15; // 温度管理失敗
         }
 
         dispatch({ type: 'ADD_QP', amount: score });
         setTotalScore(prev => prev + Math.max(0, score));
-        onComplete(totalScore + Math.max(0, score));
+
+        // 少し待ってから完了画面へ（余韻）
+        setTimeout(() => {
+            onComplete(totalScore + Math.max(0, score));
+        }, 1500);
     };
 
     const getMudColor = () => {
@@ -130,7 +196,7 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
             </div>
 
             <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints)} size="small" stage={6} />
+                <IgusaChan mood={getMoodByQP(state.qualityPoints, 6)} size="small" stage={6} />
             </div>
 
             {phase === 'dyeing' ? (
@@ -212,22 +278,21 @@ export function Stage6Dorozome({ onComplete }: StageProps) {
                     />
 
                     <div className="drying-controls">
-                        <Button variant="primary" onClick={handleTempDown}>
+                        <Button variant="primary" onClick={handleTempDown} disabled={isCompleted}>
                             ▼ 下げる
                         </Button>
-                        <Button variant="danger" onClick={handleTempUp}>
+                        <Button variant="danger" onClick={handleTempUp} disabled={isCompleted}>
                             ▲ 上げる
                         </Button>
                     </div>
 
-                    <Button
-                        variant="success"
-                        fullWidth
-                        onClick={handleDryComplete}
-                        disabled={dryingTime < 10}
-                    >
-                        乾燥完了 ({dryingTime}/{targetDryingTime}秒)
-                    </Button>
+                    <div className="game-progress" style={{ marginTop: '20px' }}>
+                        {isCompleted ? (
+                            <p className="text-success" style={{ fontSize: '1.2em', fontWeight: 'bold' }}>乾燥完了！</p>
+                        ) : (
+                            <p>乾燥中... {dryingTime}/{targetDryingTime}秒</p>
+                        )}
+                    </div>
                 </div>
             )}
 

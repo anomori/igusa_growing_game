@@ -6,7 +6,7 @@ import {
     getStageByDay,
     StageType
 } from '../types/game';
-import { saveGameState, loadGameState } from '../utils/storage';
+import { saveGameState, loadGameState, clearGameState } from '../utils/storage';
 
 // Reducer
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -19,6 +19,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'NEXT_DAY': {
             const nextDay = Math.min(state.currentDay + 1, 30);
+            const nextStage = getStageByDay(nextDay);
+            return {
+                ...state,
+                currentDay: nextDay,
+                currentStage: nextStage.type,
+                isGameCompleted: nextDay === 30 && state.stageProgress.kensa.completed,
+            };
+        }
+
+        case 'JUMP_TO_DAY': {
+            const nextDay = Math.min(action.day, 30);
             const nextStage = getStageByDay(nextDay);
             return {
                 ...state,
