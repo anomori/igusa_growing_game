@@ -1223,33 +1223,33 @@
 }
 
 .finished-tatami.rank-b {
-    /* 標準品質：ベースは緑だが、たまに黒っぽい緑の筋が入る */
-    background: repeating-linear-gradient(0deg,
-            #9CCC65,
-            #9CCC65 15px,
-            #558B2F 15px,
-            /* 黒筋 (1px) */
-            #558B2F 16px,
-            #9CCC65 16px,
-            #9CCC65 30px);
+    /* 標準品質：ベースは緑、上の方に1本だけ少し濃い筋が入る */
+    background: linear-gradient(0deg,
+            #9CCC65 0%,
+            #9CCC65 70%,
+            #689F38 70%,
+            #689F38 72%,
+            /* 1本だけ */
+            #9CCC65 72%,
+            #9CCC65 100%);
     color: white;
 }
 
 .finished-tatami.rank-c {
-    /* 色ムラあり：明確な黒筋が複数入る */
+    /* 色ムラあり：数本の黒筋が入る */
     background: repeating-linear-gradient(0deg,
             #AED581,
-            #AED581 10px,
-            #33691E 10px,
-            /* 濃い黒筋 (2px) */
-            #33691E 12px,
             #AED581 12px,
-            #AED581 20px,
-            #558B2F 20px,
-            /* 少し薄めの黒筋 */
-            #558B2F 22px,
-            #AED581 22px,
-            #AED581 30px);
+            #558B2F 12px,
+            /* 濃い黒筋 */
+            #558B2F 13px,
+            #AED581 13px,
+            #AED581 30px,
+            #689F38 30px,
+            /* 薄めの黒筋 */
+            #689F38 31px,
+            #AED581 31px,
+            #AED581 40px);
     color: var(--color-text);
 }
 
