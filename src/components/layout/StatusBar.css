@@ -1,0 +1,75 @@
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+    box-shadow: var(--shadow-md);
+    min-height: 48px;
+}
+
+.status-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.status-month {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+.status-stage {
+    font-size: var(--font-size-xs);
+    opacity: 0.9;
+}
+
+.status-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.status-day {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.status-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.status-qp {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.status-qp.qp-excellent {
+    background: var(--color-qp-excellent);
+    color: var(--color-text);
+}
+
+.status-qp.qp-happy {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.status-qp.qp-normal {
+    background: var(--color-qp-normal);
+    color: var(--color-text);
+}
+
+.status-qp.qp-sad {
+    background: var(--color-qp-sad);
+}
+
+.status-mood {
+    font-size: 20px;
+}

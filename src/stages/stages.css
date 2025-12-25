@@ -1,0 +1,929 @@
+/* Stages Common Styles */
+
+.stage-game {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+}
+
+.game-instruction {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    border-radius: var(--radius-md);
+}
+
+.game-instruction p {
+    margin: 0;
+    font-size: var(--font-size-md);
+    color: var(--color-primary-dark);
+}
+
+.game-instruction .hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
+}
+
+.character-display {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-sm);
+}
+
+.character-display.large {
+    padding: var(--spacing-lg);
+}
+
+.game-progress {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    padding: var(--spacing-sm);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+}
+
+.stage-complete {
+    text-align: center;
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    border-radius: var(--radius-lg);
+    animation: slideUp 0.5s ease;
+}
+
+.complete-message {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+    color: var(--color-primary-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+.badge-earned {
+    font-size: var(--font-size-md);
+    color: var(--color-accent-dark);
+    font-weight: 600;
+    margin: var(--spacing-md) 0;
+    animation: sparkle 1s infinite;
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.text-danger {
+    color: var(--color-error);
+}
+
+/* Stage 1: Kabuwake */
+.kabuwake-field {
+    position: relative;
+    height: 200px;
+    background: linear-gradient(to bottom, #A5D6A7 0%, #81C784 100%);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    /* 横スクロールを許可 */
+    overflow-y: hidden;
+}
+
+.parent-plant {
+    position: relative;
+    width: 500%;
+    /* 幅を広げて150本を収める */
+    height: 100%;
+}
+
+.sprout {
+    position: absolute;
+    bottom: 20%;
+    font-size: 24px;
+    transform: translateX(-50%);
+}
+
+.sprout.new-shoot {
+    color: #F44336;
+    animation: pulse 1s infinite;
+}
+
+.cut-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-error);
+}
+
+.cut-selector {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-md);
+}
+
+.cut-slider {
+    width: 100%;
+}
+
+.cut-preview {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 2px dashed var(--color-text);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.cut-selector-container {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.cut-selector {
+    width: 100%;
+    margin-bottom: var(--spacing-xs);
+}
+
+.slider-instruction {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+.preview-info {
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+}
+
+/* Stage 2: Uetsuke */
+.planting-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--spacing-md);
+    background: #8B5A2B;
+    border-radius: var(--radius-md);
+}
+
+.grid-row {
+    display: flex;
+    gap: 4px;
+}
+
+.grid-cell {
+    flex: 1;
+    aspect-ratio: 1;
+    background: #A0522D;
+    border: 2px solid #654321;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.grid-cell.planted {
+    background: #6B8E23;
+    border-color: #556B2F;
+}
+
+.grid-cell:hover {
+    transform: scale(1.05);
+}
+
+.plant-count {
+    text-align: center;
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+}
+
+.water-management {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.day-indicator {
+    text-align: center;
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    color: var(--color-primary-dark);
+}
+
+.field-container {
+    position: relative;
+    height: 150px;
+    background: #8B5A2B;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.water-surface {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(33, 150, 243, 0.5);
+    transition: height var(--transition-normal);
+}
+
+.planted-seedlings {
+    position: absolute;
+    bottom: 20%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: var(--spacing-sm);
+}
+
+.field-seedling {
+    font-size: 20px;
+}
+
+.water-gauge {
+    padding: var(--spacing-sm);
+}
+
+.target-info {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
+}
+
+.water-controls {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* Stage 3: Sakigari */
+.sakigari-field {
+    position: relative;
+    height: 250px;
+    display: flex;
+    background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 70%, #8B4513 70%, #654321 100%);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.height-ruler {
+    width: 60px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.ruler-mark {
+    position: absolute;
+    right: 4px;
+    font-size: 10px;
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+.ruler-mark.target {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.igusa-display {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 20%;
+}
+
+.igusa-plant {
+    font-size: 40px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.cut-line-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-error);
+    font-weight: bold;
+}
+
+.height-display {
+    text-align: center;
+}
+
+.height-display p {
+    margin: var(--spacing-xs) 0;
+}
+
+.result-text {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    animation: slideUp 0.3s ease;
+}
+
+.height-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+}
+
+.height-value {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Stage 4: Seicho */
+.growth-field {
+    position: relative;
+    height: 200px;
+    background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #228B22 60%, #006400 100%);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.igusa-rows {
+    font-size: 24px;
+    letter-spacing: 8px;
+    transition: height var(--transition-slow);
+}
+
+.net-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #333;
+    font-size: 12px;
+    background: rgba(200, 200, 200, 0.5);
+    padding: 2px;
+}
+
+.event-card {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+.event-card h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-sm);
+}
+
+.event-card p {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-light);
+}
+
+.event-net {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+}
+
+.event-bug {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+}
+
+.event-gas {
+    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+}
+
+.event-typhoon {
+    background: linear-gradient(135deg, #E8EAF6 0%, #C5CAE9 100%);
+}
+
+.net-info {
+    font-weight: bold;
+    color: var(--color-primary-dark);
+}
+
+.bug-field {
+    position: relative;
+    height: 150px;
+    background: rgba(139, 69, 19, 0.2);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.bug-target {
+    position: absolute;
+    font-size: 28px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform var(--transition-fast);
+}
+
+.bug-target:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.gas-bubbles {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.bubble {
+    font-size: 24px;
+    color: #90A4AE;
+    animation: bounce 1s infinite;
+}
+
+.day-status {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+}
+
+/* Stage 5: Shukaku */
+.time-selection {
+    text-align: center;
+}
+
+.time-selection h3 {
+    margin-bottom: var(--spacing-lg);
+}
+
+.time-options {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.time-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.time-option.noon {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    border-color: var(--color-error);
+}
+
+.time-option:hover {
+    transform: scale(1.05);
+}
+
+.time-icon {
+    font-size: 40px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.time-label {
+    font-size: var(--font-size-md);
+    font-weight: bold;
+}
+
+.time-bonus {
+    font-size: var(--font-size-sm);
+    color: var(--color-success);
+}
+
+.time-penalty {
+    font-size: var(--font-size-sm);
+    color: var(--color-error);
+}
+
+.harvest-header {
+    display: flex;
+    justify-content: space-around;
+    padding: var(--spacing-sm);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    font-weight: bold;
+}
+
+.harvest-field {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 70%, #228B22 70%, #006400 100%);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.flying-igusa {
+    position: absolute;
+    font-size: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transform: translate(-50%, 0);
+    transition: transform var(--transition-fast);
+}
+
+.flying-igusa:hover {
+    transform: translate(-50%, 0) scale(1.2);
+}
+
+.flying-igusa.good {
+    filter: hue-rotate(0deg);
+}
+
+.flying-igusa.bad {
+    filter: hue-rotate(180deg);
+}
+
+.water-gauge-area {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+/* Stage 6: Dorozome */
+.dyeing-phase,
+.drying-phase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.mud-container {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.mud-vessel {
+    position: relative;
+    width: 120px;
+    height: 180px;
+    background: linear-gradient(135deg, #5D4037 0%, #3E2723 100%);
+    border-radius: 0 0 60px 60px;
+    overflow: hidden;
+    border: 4px solid #3E2723;
+}
+
+.mud-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, #6D4C41, #8D6E63);
+    transition: height var(--transition-fast);
+}
+
+.target-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-success);
+    font-size: 10px;
+    color: var(--color-success);
+    padding-left: 4px;
+}
+
+.dyeing-controls {
+    display: flex;
+    justify-content: center;
+}
+
+.temperature-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.thermometer {
+    width: 30px;
+    height: 150px;
+    background: #E0E0E0;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.temp-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transition: height var(--transition-fast), background var(--transition-fast);
+}
+
+.temp-value {
+    font-size: var(--font-size-2xl);
+    font-weight: bold;
+}
+
+.temp-target {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.drying-controls {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+}
+
+/* Stage 7: Seishoku */
+.selection-phase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.igusa-selection {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+.igusa-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-surface);
+    border: 2px solid var(--color-bg-dark);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-width: 80px;
+}
+
+.igusa-item:hover {
+    transform: scale(1.05);
+}
+
+.igusa-item.quality-good:hover {
+    border-color: var(--color-success);
+    background: #E8F5E9;
+}
+
+.igusa-visual {
+    font-size: 32px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.igusa-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+}
+
+.selection-hint {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    background: var(--color-bg);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+.weaving-phase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.weaving-display {
+    padding: var(--spacing-lg);
+    background: #F5DEB3;
+    border-radius: var(--radius-md);
+}
+
+.loom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.warp-threads {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #8B4513;
+}
+
+.weave-indicator {
+    font-size: 24px;
+    font-weight: bold;
+    animation: pulse 0.5s infinite;
+}
+
+.weave-indicator.left {
+    color: var(--color-primary);
+}
+
+.weave-indicator.right {
+    color: var(--color-secondary);
+}
+
+.direction-indicator {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-lg);
+}
+
+.direction-indicator span {
+    color: var(--color-text-muted);
+}
+
+.direction-indicator span.active {
+    color: var(--color-primary);
+    font-weight: bold;
+    animation: pulse 0.5s infinite;
+}
+
+.weave-controls {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xl);
+}
+
+.weave-info {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+/* Stage 8: Kensa */
+.inspection-area {
+    flex: 1;
+    min-height: 300px;
+    cursor: crosshair;
+}
+
+.tatami-surface {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #9ACD32 0%, #6B8E23 100%);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.weave-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 4px,
+            rgba(0, 0, 0, 0.05) 4px,
+            rgba(0, 0, 0, 0.05) 8px);
+}
+
+.defect-spot {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: rgba(139, 69, 19, 0.6);
+    border: none;
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: all var(--transition-fast);
+}
+
+.defect-spot:hover {
+    background: rgba(139, 69, 19, 0.8);
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.defect-spot.found {
+    background: var(--color-success);
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inspection-info {
+    display: flex;
+    justify-content: space-around;
+    padding: var(--spacing-sm);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+}
+
+.final-results {
+    text-align: center;
+    padding: var(--spacing-lg);
+}
+
+.rank-display {
+    font-size: 64px;
+    font-weight: bold;
+    margin: var(--spacing-lg) 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rank-display.rank-s {
+    color: #FFD700;
+}
+
+.rank-display.rank-a {
+    color: #4CAF50;
+}
+
+.rank-display.rank-b {
+    color: #2196F3;
+}
+
+.rank-display.rank-c {
+    color: #FF9800;
+}
+
+.rank-display.rank-d {
+    color: #F44336;
+}
+
+.rank-message {
+    font-size: var(--font-size-md);
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-lg);
+}
+
+.final-stats {
+    padding: var(--spacing-md);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.tatami-preview {
+    margin: var(--spacing-lg) 0;
+}
+
+.finished-tatami {
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-lg);
+}
+
+.finished-tatami.rank-s {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
+}
+
+.finished-tatami.rank-a {
+    background: linear-gradient(135deg, #9ACD32 0%, #6B8E23 100%);
+    color: white;
+}
+
+.finished-tatami.rank-b {
+    background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%);
+    color: white;
+}
+
+.finished-tatami.rank-c {
+    background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
+    color: var(--color-text);
+}
+
+.finished-tatami.rank-d {
+    background: linear-gradient(135deg, #BCAAA4 0%, #8D6E63 100%);
+    color: white;
+}
