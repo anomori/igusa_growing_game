@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState, ReactNode } from 'react';
 import {
     GameState,
     GameAction,
@@ -100,20 +100,26 @@ interface GameProviderProps {
 }
 
 export function GameProvider({ children }: GameProviderProps) {
-    const [state, dispatch] = useReducer(gameReducer, initialGameState);
-
-    // ゲーム状態をロード
-    useEffect(() => {
+    // 初期状態をlocalStorageから読み込み（同期的に）
+    const getInitialState = (): GameState => {
         const savedState = loadGameState();
-        if (savedState) {
-            dispatch({ type: 'LOAD_GAME', state: savedState });
-        }
+        return savedState || initialGameState;
+    };
+
+    const [state, dispatch] = useReducer(gameReducer, getInitialState());
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // 初期化完了をマーク
+    useEffect(() => {
+        setIsInitialized(true);
     }, []);
 
-    // ゲーム状態を保存
+    // ゲーム状態を保存（初期化後のみ）
     useEffect(() => {
-        saveGameState(state);
-    }, [state]);
+        if (isInitialized) {
+            saveGameState(state);
+        }
+    }, [state, isInitialized]);
 
     return (
         <GameContext.Provider value={{ state, dispatch }}>

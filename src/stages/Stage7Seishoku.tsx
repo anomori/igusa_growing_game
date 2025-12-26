@@ -24,7 +24,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
     const [phase, setPhase] = useState<Phase>('selection');
     const [igusaItems, setIgusaItems] = useState<IgusaItem[]>([]);
     const [weavingCount, setWeavingCount] = useState(0);
-    const [density, setDensity] = useState(50);
+    const [density, setDensity] = useState(40); // 初期密度 40% (3200本)
     const [currentDirection, setCurrentDirection] = useState<Direction>('left');
     const [timeLeft, setTimeLeft] = useState(1.5);
     const [totalScore, setTotalScore] = useState(0);
@@ -88,7 +88,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                     // タイムアウト - Miss処理
                     setIsProcessing(true);
                     dispatch({ type: 'ADD_QP', amount: -1 });
-                    setDensity(d => Math.max(0, d - 1));
+                    setDensity(d => Math.max(0, d - 1.5));
                     setWeavingCount(c => c + 1);
                     setCurrentDirection(d => d === 'left' ? 'right' : 'left');
                     setTimeout(() => setIsProcessing(false), 100);
@@ -113,21 +113,22 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
             if (timeLeft > 1) {
                 // Perfect
                 qp = 2;
-                densityChange = 2; // 増加量を減らす (3 -> 2)
+                densityChange = 1.2; // 50回で+60 (初期40+60=100)
             } else {
                 // Good
                 qp = 1;
-                densityChange = 1; // 増加量を減らす (2 -> 1)
+                densityChange = 0.6; // 50回で+30 (初期40+30=70)
             }
         } else {
             // Miss
             qp = -1;
-            densityChange = -2; // 減少量を増やす (-1 -> -2)
+            densityChange = -1.5; // 減少
         }
 
         dispatch({ type: 'ADD_QP', amount: qp });
         setTotalScore(prev => prev + Math.max(0, qp));
-        setDensity(prev => Math.min(150, Math.max(0, prev + densityChange)));
+        // 密度上限なし、バランス調整で8000本前後を目指す
+        setDensity(prev => Math.max(0, prev + densityChange));
         setWeavingCount(prev => prev + 1);
         setCurrentDirection(prev => prev === 'left' ? 'right' : 'left');
         setTimeLeft(1.5);
@@ -145,10 +146,10 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
     };
 
     const getIgusaByCount = () => {
-        // 密度(%)から本数を計算（最大約8000本）
+        // 密度(%)から本数を計算（最大8000本）
         // density 50(初期) -> 6000本
-        // desnity 100(MAX) -> 8000本
-        // density 0 -> 4000本以下
+        // density 100(MAX) -> 8000本
+        // density 0 -> 4000本
         const base = 4000;
         const additional = Math.floor((density / 100) * 4000);
         const count = base + additional;
@@ -161,16 +162,9 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
         <div className="stage-game stage-seishoku">
             <div className="game-instruction">
                 <p>{phase === 'selection' ? 'い草を選別しよう！' : '畳表を織ろう！'}</p>
-                <p className="hint">
-                    {phase === 'selection'
-                        ? '良品質のい草を選んでタップ'
-                        : currentDirection === 'left' ? '← 左にスワイプ！' : '右にスワイプ！ →'
-                    }
-                </p>
-            </div>
-
-            <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints, 7)} size="small" stage={7} />
+                {phase === 'selection' && (
+                    <p className="hint">良品質のい草を選んでタップ</p>
+                )}
             </div>
 
             {phase === 'selection' ? (
@@ -244,7 +238,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                     </div>
 
                     <ProgressBar
-                        value={density}
+                        value={Math.round(density * 10) / 10}
                         max={100}
                         label="密度"
                         showValue
@@ -259,12 +253,20 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
             ) : (
                 <div className="stage-complete">
                     <p className="complete-message">製織完了！</p>
-                    <p>密度: {density}%（{getIgusaByCount()}）</p>
+                    <p>密度: {density.toFixed(1)}%（{getIgusaByCount()}）</p>
                     <p>スコア: {totalScore} QP</p>
                     {density >= 90 && (
                         <p className="badge-earned">🏆 「織師の匠」バッジ獲得！</p>
                     )}
-                    <Button variant="success" fullWidth onClick={() => onComplete(totalScore)}>
+                    <Button variant="success" fullWidth onClick={() => {
+                        if (density >= 90) {
+                            dispatch({
+                                type: 'EARN_BADGE',
+                                badge: { id: 'seishoku', name: '織師の匠', icon: '🧵', description: '密度90%以上で製織' }
+                            });
+                        }
+                        onComplete(totalScore);
+                    }}>
                         ☀️ 次の日へ進む
                     </Button>
                 </div>

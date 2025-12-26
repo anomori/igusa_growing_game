@@ -1,17 +1,17 @@
 .quiz-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-xs);
 }
 
 .quiz-question {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     color: var(--color-text);
-    line-height: 1.5;
+    line-height: 1.4;
     text-align: center;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background: var(--color-bg);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
 }
 
 .quiz-options {
@@ -23,11 +23,11 @@
 .quiz-option {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
     background: var(--color-surface);
     border: 2px solid var(--color-bg-dark);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
     text-align: left;
@@ -58,15 +58,15 @@
 }
 
 .option-letter {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--color-bg-dark);
     border-radius: var(--radius-round);
     font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     flex-shrink: 0;
 }
 
@@ -92,8 +92,8 @@
 }
 
 .quiz-result {
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
     text-align: center;
     animation: slideUp 0.3s ease;
 }
@@ -107,9 +107,9 @@
 }
 
 .result-label {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: 600;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .result-explanation {
@@ -126,5 +126,5 @@
 }
 
 .quiz-actions {
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-xs);
 }

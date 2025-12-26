@@ -142,10 +142,6 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
                 )}
             </div>
 
-            <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints, 5)} size="small" stage={5} />
-            </div>
-
             {!timeOfDay ? (
                 <div className="time-selection">
                     <h3>【時間帯を選んでください】</h3>
@@ -181,7 +177,10 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
                                 key={igusa.id}
                                 className={`flying-igusa ${igusa.isGood ? 'good' : 'bad'}`}
                                 style={{ left: `${igusa.x}%`, bottom: `${igusa.y}%` }}
-                                onClick={() => handleCut(igusa)}
+                                onPointerDown={(e) => {
+                                    e.preventDefault();
+                                    handleCut(igusa);
+                                }}
                             >
                                 <div className={`icon-stalk ${igusa.isGood ? 'good' : 'bad'}`} />
                             </button>
@@ -199,7 +198,15 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
                     {maxCombo >= 50 && (
                         <p className="badge-earned">🏆 「収穫マスター」バッジ獲得！</p>
                     )}
-                    <Button variant="success" fullWidth onClick={() => onComplete(score)}>
+                    <Button variant="success" fullWidth onClick={() => {
+                        if (maxCombo >= 50) {
+                            dispatch({
+                                type: 'EARN_BADGE',
+                                badge: { id: 'shukaku', name: '収穫マスター', icon: '🌾', description: '50コンボ以上達成' }
+                            });
+                        }
+                        onComplete(score);
+                    }}>
                         ☀️ 次の日へ進む
                     </Button>
                 </div>

@@ -32,7 +32,7 @@ export const quizData: Quiz[] = [
         question: '畳が音を吸収する効果は何と呼ばれる？',
         options: ['防音効果', '吸音効果', '反響効果', '消音効果'],
         correctIndex: 1,
-        explanation: '畳には多くの空気が含まれており、音を吸収する「吸音効果」があります。また、音を遮る「遮音効果」も併せ持ち、生活音を和らげてくれます。',
+        explanation: '畳には多くの空気が含まれており、音を吸収する「吸音効果」があります。生活音を和らげてくれます。',
     },
 
     // い草の知識
@@ -120,13 +120,48 @@ export const quizData: Quiz[] = [
     },
 ];
 
-// カテゴリーからランダムにクイズを取得
+// 使用済みクイズIDを追跡
+let usedQuizIds: Set<string> = new Set();
+
+// 選択肢をシャッフルしたクイズを返す
+function shuffleQuizOptions(quiz: Quiz): Quiz {
+    // 選択肢とインデックスのペアを作成
+    const optionsWithIndex = quiz.options.map((opt, idx) => ({ opt, idx }));
+
+    // シャッフル
+    for (let i = optionsWithIndex.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [optionsWithIndex[i], optionsWithIndex[j]] = [optionsWithIndex[j], optionsWithIndex[i]];
+    }
+
+    // 新しい正解インデックスを見つける
+    const newCorrectIndex = optionsWithIndex.findIndex(item => item.idx === quiz.correctIndex);
+
+    return {
+        ...quiz,
+        options: optionsWithIndex.map(item => item.opt),
+        correctIndex: newCorrectIndex
+    };
+}
+
+// カテゴリーからランダムにクイズを取得（未使用のもの優先）
 export function getRandomQuiz(category?: 'effect' | 'knowledge' | 'history'): Quiz {
     const filtered = category
         ? quizData.filter(q => q.category === category)
         : quizData;
-    const randomIndex = Math.floor(Math.random() * filtered.length);
-    return filtered[randomIndex];
+
+    // 未使用のクイズを優先
+    const unused = filtered.filter(q => !usedQuizIds.has(q.id));
+    const pool = unused.length > 0 ? unused : filtered;
+
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const selectedQuiz = pool[randomIndex];
+
+    // 使用済みとしてマーク
+    usedQuizIds.add(selectedQuiz.id);
+
+    // 選択肢をシャッフルして返す
+    return shuffleQuizOptions(selectedQuiz);
 }
 
 // ステージに応じたクイズを取得
@@ -134,4 +169,9 @@ export function getQuizForStage(stageIndex: number): Quiz {
     // ステージに応じてカテゴリを変える
     const categories: ('effect' | 'knowledge' | 'history')[] = ['knowledge', 'knowledge', 'effect', 'knowledge', 'knowledge', 'effect', 'history', 'history'];
     return getRandomQuiz(categories[stageIndex % categories.length]);
+}
+
+// ゲームリセット時に使用済みクイズをクリア
+export function resetUsedQuizzes(): void {
+    usedQuizIds = new Set();
 }

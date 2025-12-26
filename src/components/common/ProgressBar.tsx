@@ -7,6 +7,7 @@ interface ProgressBarProps {
     showValue?: boolean;
     color?: 'primary' | 'success' | 'warning' | 'danger';
     size?: 'small' | 'medium' | 'large';
+    unit?: string;
 }
 
 export function ProgressBar({
@@ -16,6 +17,7 @@ export function ProgressBar({
     showValue = false,
     color = 'primary',
     size = 'medium',
+    unit = '',
 }: ProgressBarProps) {
     const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
@@ -30,7 +32,7 @@ export function ProgressBar({
             </div>
             {showValue && (
                 <span className="progress-value">
-                    {value}/{max}
+                    {value}/{max}{unit}
                 </span>
             )}
         </div>

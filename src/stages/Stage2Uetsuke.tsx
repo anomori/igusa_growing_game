@@ -127,16 +127,8 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
         }
     }, [grid, waterLevel, seedlingPositions]);
 
-    // 水位の自然変動（蒸発）
-    useEffect(() => {
-        if (isPlanting) return;
-
-        const interval = setInterval(() => {
-            setWaterLevel(prev => Math.max(0, prev - 0.1));
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isPlanting]);
+    // 水位の自然変動（蒸発）は無効化
+    // プレイヤーが自分で調整するゲーム性を重視
 
     // Canvas再描画
     useEffect(() => {
@@ -272,10 +264,6 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                 </p>
             </div>
 
-            <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints, 2)} size="small" stage={2} />
-            </div>
-
             {isPlanting ? (
                 <>
                     <div className="planting-grid">
@@ -326,6 +314,7 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                                 label="水位"
                                 showValue
                                 color={getWaterColor()}
+                                unit="cm"
                             />
                             <p className="target-info">
                                 目標: {targetWaterLevel.min}〜{targetWaterLevel.max}cm

@@ -157,10 +157,6 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                 <p className="hint">▲▼ボタンで刈り高さを調整</p>
             </div>
 
-            <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints, 3)} size="small" stage={3} />
-            </div>
-
             {!isComplete ? (
                 <>
                     <div className="sakigari-field">
@@ -216,7 +212,15 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                     {perfectCount >= targetCount / 2 && (
                         <p className="badge-earned">🏆 「先刈り名人」バッジ獲得！</p>
                     )}
-                    <Button variant="success" fullWidth onClick={() => onComplete(totalScore)}>
+                    <Button variant="success" fullWidth onClick={() => {
+                        if (perfectCount >= targetCount / 2) {
+                            dispatch({
+                                type: 'EARN_BADGE',
+                                badge: { id: 'sakigari', name: '先刈り名人', icon: '✂️', description: '先刈りで50%以上パーフェクト' }
+                            });
+                        }
+                        onComplete(totalScore);
+                    }}>
                         ☀️ 次の日へ進む
                     </Button>
                 </div>

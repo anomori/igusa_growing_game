@@ -16,8 +16,9 @@ import { Stage7Seishoku } from './stages/Stage7Seishoku';
 import { Stage8Kensa } from './stages/Stage8Kensa';
 import { TitleVisual } from './components/title/TitleVisual';
 import { StatusIcon } from './components/common/StatusIcon';
+import { BadgeIcon } from './components/common/BadgeIcon';
 import { getMoodByQP, getStageByDay, getFinalRank, getNextStageStartDay, STAGES } from './types/game';
-import { getQuizForStage } from './data/quizData';
+import { getQuizForStage, resetUsedQuizzes } from './data/quizData';
 import { getHintForStage } from './data/hintsData';
 import { clearGameState } from './utils/storage';
 import './App.css';
@@ -50,6 +51,7 @@ function GameContent() {
     // ゲーム開始
     const handleStartGame = () => {
         clearGameState(); // 保存データをクリア
+        resetUsedQuizzes(); // クイズ履歴をリセット
         dispatch({ type: 'START_GAME' });
         setScreen('game');
         setShowHint(true);
@@ -119,6 +121,7 @@ function GameContent() {
     // リセット
     const handleReset = () => {
         clearGameState(); // 保存データをクリア
+        resetUsedQuizzes(); // クイズ履歴をリセット
         dispatch({ type: 'RESET_GAME' });
         setScreen('title');
         setStageCompleted(false);
@@ -224,7 +227,7 @@ function GameContent() {
             {/* 結果画面 */}
             {screen === 'results' && (
                 <div className={`results-screen rank-${finalRank.toLowerCase()}`}>
-                    <IgusaChan mood={getMoodByQP(state.qualityPoints, 8)} size="large" stage={8} />
+                    <IgusaChan mood={getMoodByQP(state.qualityPoints, 8)} size="large" stage={8} day={30} />
 
                     <div className={`results-rank rank-${finalRank.toLowerCase()}`}>
                         {finalRank}
@@ -241,13 +244,14 @@ function GameContent() {
                     <p className="results-qp">最終QP: {state.qualityPoints}</p>
 
                     <div className="results-badges">
-                        {state.badges.map(badge => (
-                            <div key={badge.id} className="badge-item">
-                                <span className="badge-icon">{badge.icon}</span>
-                                <span className="badge-name">{badge.name}</span>
-                            </div>
-                        ))}
-                        {state.badges.length === 0 && (
+                        {state.badges.length > 0 ? (
+                            state.badges.map(badge => (
+                                <div key={badge.id} className="badge-item">
+                                    <BadgeIcon type={badge.id as any} size={40} />
+                                    <span className="badge-name">{badge.name}</span>
+                                </div>
+                            ))
+                        ) : (
                             <p>バッジ獲得なし</p>
                         )}
                     </div>

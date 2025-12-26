@@ -26,26 +26,13 @@ export function StageProgress() {
                     const status = getStageStatus(stage.type);
                     return (
                         <div key={stage.type} className="stage-item-wrapper">
-                            <div className={`stage-item stage-${status}`}>
-                                <StatusIcon type={stage.type} size={24} />
+                            <div className={`stage-item stage-${status}`} title={stage.name}>
+                                <StatusIcon type={stage.type} size={18} />
                             </div>
                             {index < STAGES.length - 1 && (
                                 <div className={`stage-connector ${status === 'completed' ? 'completed' : ''}`} />
                             )}
                         </div>
-                    );
-                })}
-            </div>
-            <div className="stage-labels">
-                {STAGES.map((stage) => {
-                    const status = getStageStatus(stage.type);
-                    return (
-                        <span
-                            key={stage.type}
-                            className={`stage-label stage-label-${status}`}
-                        >
-                            {stage.name}
-                        </span>
                     );
                 })}
             </div>

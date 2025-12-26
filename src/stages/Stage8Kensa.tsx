@@ -96,10 +96,6 @@ export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
 
             {!isComplete ? (
                 <>
-                    <div className="character-display">
-                        <IgusaChan mood={getMoodByQP(state.qualityPoints, 8)} size="small" stage={8} />
-                    </div>
-
                     <div
                         className="inspection-area"
                         onClick={(e) => {

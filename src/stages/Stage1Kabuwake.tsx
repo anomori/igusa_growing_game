@@ -131,7 +131,7 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         if (!isComplete) {
             const previewX = (currentSection[1] / 100) * rect.width;
             ctx.beginPath();
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.moveTo(previewX, 0);
@@ -249,10 +249,6 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                 <p className="hint">色の違う新芽（明るい緑）を<strong>必ず1本</strong>入れてね（残り{targetCuts - cutLines.length}回）</p>
             </div>
 
-            <div className="character-display">
-                <IgusaChan mood={getMoodByQP(state.qualityPoints, 1)} size="small" stage={1} />
-            </div>
-
             <div className="kabuwake-field" ref={containerRef}>
                 <canvas ref={igusaCanvasRef} style={{ width: '100%', height: '100%' }} />
             </div>
@@ -304,7 +300,15 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                     {getPerfectCount() === targetCuts && (
                         <p className="badge-earned">🏆 「株分け名人」バッジ獲得！</p>
                     )}
-                    <Button variant="success" fullWidth onClick={() => onComplete(getTotalScore())}>
+                    <Button variant="success" fullWidth onClick={() => {
+                        if (getPerfectCount() === targetCuts) {
+                            dispatch({
+                                type: 'EARN_BADGE',
+                                badge: { id: 'kabuwake', name: '株分け名人', icon: '🌱', description: '株分けで全てパーフェクト' }
+                            });
+                        }
+                        onComplete(getTotalScore());
+                    }}>
                         ☀️ 次の日へ進む
                     </Button>
                 </div>

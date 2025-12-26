@@ -13,7 +13,7 @@
 ### オンラインでプレイ
 
 GitHub Pagesでプレイできます:  
-👉 https://[username].github.io/igusa_growing_game/
+👉 https://anomori.github.io/igusa_growing_game/
 
 ### ローカルで実行
 

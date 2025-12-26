@@ -1,5 +1,6 @@
 import { useGame } from '../../context/GameContext';
 import { getStageByDay, getMoodByQP, STAGES } from '../../types/game';
+import { IgusaChan } from '../character/IgusaChan';
 import './StatusBar.css';
 
 export function StatusBar() {
@@ -7,15 +8,6 @@ export function StatusBar() {
     const currentStageInfo = getStageByDay(state.currentDay);
     const stageIndex = STAGES.findIndex(s => s.type === state.currentStage) + 1;
     const mood = getMoodByQP(state.qualityPoints, stageIndex);
-
-    const getMoodEmoji = () => {
-        switch (mood) {
-            case 'excellent': return '🌟';
-            case 'happy': return '😊';
-            case 'normal': return '😐';
-            case 'sad': return '😢';
-        }
-    };
 
     const getQPColor = () => {
         if (state.qualityPoints >= 120) return 'excellent';
@@ -37,7 +29,9 @@ export function StatusBar() {
                 <span className={`status-qp qp-${getQPColor()}`}>
                     QP: {state.qualityPoints}
                 </span>
-                <span className="status-mood">{getMoodEmoji()}</span>
+                <div className="status-character">
+                    <IgusaChan mood={mood} size="small" stage={stageIndex} day={state.currentDay} />
+                </div>
             </div>
         </div>
     );

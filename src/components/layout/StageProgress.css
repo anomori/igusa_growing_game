@@ -1,14 +1,14 @@
 .stage-progress {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-bg-dark);
-    overflow-x: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .stage-progress-track {
     display: flex;
     align-items: center;
-    min-width: max-content;
 }
 
 .stage-item-wrapper {
@@ -17,8 +17,8 @@
 }
 
 .stage-item {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--radius-round);
     display: flex;
     align-items: center;
@@ -28,17 +28,17 @@
 }
 
 .stage-icon {
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .stage-item.stage-completed {
     background: var(--color-primary);
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
 }
 
 .stage-item.stage-current {
     background: var(--color-accent);
-    box-shadow: 0 2px 8px rgba(255, 213, 79, 0.5);
+    box-shadow: 0 2px 6px rgba(255, 213, 79, 0.5);
     animation: pulse 2s infinite;
 }
 
@@ -48,37 +48,14 @@
 }
 
 .stage-connector {
-    width: 20px;
-    height: 3px;
+    width: 12px;
+    height: 2px;
     background: var(--color-bg-dark);
     flex-shrink: 0;
 }
 
 .stage-connector.completed {
     background: var(--color-primary);
-}
-
-.stage-labels {
-    display: flex;
-    margin-top: var(--spacing-xs);
-    min-width: max-content;
-}
-
-.stage-label {
-    width: 56px;
-    font-size: 10px;
-    text-align: center;
-    color: var(--color-text-muted);
-    flex-shrink: 0;
-}
-
-.stage-label-completed {
-    color: var(--color-primary);
-}
-
-.stage-label-current {
-    color: var(--color-accent-dark);
-    font-weight: 600;
 }
 
 /* スクロールバーを隠す */
