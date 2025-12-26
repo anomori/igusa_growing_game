@@ -117,32 +117,36 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
     }, [day]);
 
     // 害虫退治モードの背景描画 (Canvas)
-    useEffect(() => {
-        if (event?.type !== 'bug') return; // eventではなくcurrentEventを見るべきだが、ここは元のコードに依存
-        // 正しくは currentEvent
-    }, [day]); // ダミー、下のロジックで上書き
-
-    // 正しい害虫Canvas描画ロジック
+    // リトライロジックを追加したバージョン
     useEffect(() => {
         if (currentEvent !== 'bug') return;
 
-        const timer = setTimeout(() => {
+        let animationFrameId: number;
+        let retryCount = 0;
+
+        const renderCanvas = () => {
             const canvas = bugCanvasRef.current;
             if (!canvas) return;
+
+            const rect = canvas.getBoundingClientRect();
+            // サイズが取得できるまでリトライ（最大20回）
+            if ((rect.width === 0 || rect.height === 0) && retryCount < 20) {
+                retryCount++;
+                animationFrameId = requestAnimationFrame(renderCanvas);
+                return;
+            }
 
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
 
             const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) return;
+            // rectが0の場合のフォールバック
+            const width = rect.width || canvas.clientWidth || 300;
+            const height = rect.height || canvas.clientHeight || 120;
 
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
             ctx.scale(dpr, dpr);
-
-            const width = rect.width;
-            const height = rect.height;
 
             // 背景クリア
             ctx.clearRect(0, 0, width, height);
@@ -159,38 +163,21 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(x, height - 10);
-                ctx.quadraticCurveTo(x + (Math.random() - 0.5) * 10, height - 10 - h / 2, x + (Math.random() - 0.5) * 20, height - 10 - h);
+                // 上部は少しランダムに
+                ctx.quadraticCurveTo(
+                    x + (Math.random() - 0.5) * 10,
+                    height - 10 - h / 2,
+                    x + (Math.random() - 0.5) * 20,
+                    height - 10 - h
+                );
                 ctx.stroke();
             }
+        };
 
-            // 2. 害虫が乗っているい草（位置合わせ）
-            bugs.forEach(bug => {
-                const x = (bug.x / 100) * width;
-                const y = (bug.y / 100) * height;
+        // 少し遅延させてから開始
+        animationFrameId = requestAnimationFrame(renderCanvas);
 
-                // 虫の位置まで伸びるい草
-                ctx.strokeStyle = '#2E7D32'; // 濃い目の緑
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(x, height - 10);
-
-                // 虫の位置 (x, y) に向かって緩やかにカーブ
-                // 少しだけランダムな制御点
-                const cpX = x + (Math.random() - 0.5) * 10;
-                const cpY = (height - 10 + y) / 2;
-
-                // 修正: 虫の少し下まで描画して、虫が先端に乗っているように見せる
-                // bug.y は中心座標。虫のサイズが40pxなので、足元は bug.y + 10px くらい
-                const targetY = y + 15;
-
-                ctx.quadraticCurveTo(cpX, cpY, x, targetY);
-                ctx.stroke();
-            });
-
-        }, 50);
-
-        return () => clearTimeout(timer);
+        return () => cancelAnimationFrame(animationFrameId);
     }, [currentEvent, bugs]);
 
     // 害虫をタップで駆除
@@ -329,7 +316,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                     <div className="event-card event-bug">
                         <h3>害虫発生！</h3>
                         <p style={{ fontSize: '12px', margin: '4px 0' }}>イグサシンムシガが出現！タップで駆除しよう！</p>
-                        <div className="bug-canvas-container" style={{ position: 'relative', height: '120px', borderRadius: '8px', overflow: 'hidden' }}>
+                        <div className="bug-canvas-container" style={{ position: 'relative', height: '120px', borderRadius: '8px', overflow: 'hidden', background: 'linear-gradient(to bottom, #E0F7FA 80%, #8D6E63 80%)' }}>
                             {/* Canvas背景: い草畑 */}
                             <canvas
                                 ref={canvasRef}
@@ -341,16 +328,38 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                     left: 0
                                 }}
                             />
-                            {/* 虫オーバーレイ */}
+                            {/* 虫オーバーレイ & い草 */}
                             {bugs.map(bug => (
-                                <button
-                                    key={bug.id}
-                                    className="bug-target"
-                                    style={{ left: `${bug.x}%`, top: `${bug.y}%` }}
-                                    onClick={() => handleBugTap(bug.id)}
-                                >
-                                    <div className="icon-bug" />
-                                </button>
+                                <div key={bug.id} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+                                    {/* い草の茎 (bottomから虫の位置まで) */}
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            left: `${bug.x}%`,
+                                            top: `${bug.y}%`, // 虫の中心位置
+                                            bottom: '10px', // Canvasの土の位置に合わせる
+                                            width: '4px',
+                                            background: '#2E7D32',
+                                            transform: 'translateX(-50%)',
+                                            borderRadius: '2px', // 少し丸みを持たせる
+                                            transformOrigin: 'bottom',
+                                            zIndex: 1
+                                        }}
+                                    />
+                                    {/* 虫本体 */}
+                                    <button
+                                        className="bug-target"
+                                        style={{
+                                            left: `${bug.x}%`,
+                                            top: `${bug.y}%`,
+                                            zIndex: 2,
+                                            pointerEvents: 'auto'
+                                        }}
+                                        onClick={() => handleBugTap(bug.id)}
+                                    >
+                                        <div className="icon-bug" />
+                                    </button>
+                                </div>
                             ))}
                         </div>
                         <p style={{ margin: '4px 0' }}>残り害虫: {bugs.length}匹</p>

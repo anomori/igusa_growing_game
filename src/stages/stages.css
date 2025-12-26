@@ -547,6 +547,8 @@
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-sm);
     overflow: hidden;
+    /* フォールバック背景（Canvasが出ないとき用） */
+    background: linear-gradient(to bottom, #E0F7FA 80%, #8D6E63 80%) !important;
 }
 
 .icon-bug {
