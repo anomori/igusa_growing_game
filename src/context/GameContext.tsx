@@ -45,6 +45,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 qualityPoints: Math.max(0, state.qualityPoints + action.amount),
             };
 
+        case 'SET_QP':
+            return {
+                ...state,
+                qualityPoints: Math.max(0, action.amount),
+            };
+
         case 'COMPLETE_STAGE': {
             const stageKey = action.stage as StageType;
             return {

@@ -510,14 +510,9 @@
     background: linear-gradient(to bottom, #A1887F 0%, #8D6E63 100%);
 }
 
-.water-field .gas-bubbles {
-    position: relative;
-    top: auto;
-    left: auto;
-    animation: none;
-}
 
-.water-field.water-drained .gas-bubbles {
+
+.water-field.water-drained .gas-bubbles-container {
     display: none;
 }
 
@@ -702,59 +697,117 @@
     transform: translate(-50%, -50%) scale(1.2);
 }
 
-.gas-bubbles {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 8px 0;
-    position: relative;
+/* Swamp Gas Effect */
+.gas-bubbles-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
 }
 
-.gas-bubble {
-    width: 16px;
-    height: 16px;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 200, 200, 0.3));
-    border: 1px solid rgba(180, 180, 180, 0.5);
+.gas-particle {
+    position: absolute;
+    bottom: -10px;
     border-radius: 50%;
-    animation: bubbleFloat 1.5s infinite ease-in-out;
-    box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+    /* More distinct gradient with distinct edge */
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(200, 255, 200, 0.5) 60%, rgba(180, 230, 180, 0.2) 100%);
+    /* Add distinct border for outline */
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    /* significantly reduce blur to make it clearer */
+    filter: blur(0.5px);
+    opacity: 0;
+    transform-origin: center bottom;
+    animation: gasRise 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
-.gas-bubble:nth-child(1) {
+.p1 {
+    left: 20%;
+    width: 20px;
+    height: 20px;
     animation-delay: 0s;
-    width: 12px;
-    height: 12px;
+    animation-duration: 3.5s;
 }
 
-.gas-bubble:nth-child(2) {
-    animation-delay: 0.3s;
+.p2 {
+    left: 35%;
+    width: 25px;
+    height: 25px;
+    animation-delay: 0.5s;
+    animation-duration: 4s;
+}
+
+.p3 {
+    left: 50%;
+    width: 15px;
+    height: 15px;
+    animation-delay: 1.2s;
+    animation-duration: 3s;
+}
+
+.p4 {
+    left: 65%;
+    width: 22px;
+    height: 22px;
+    animation-delay: 0.2s;
+    animation-duration: 3.8s;
+}
+
+.p5 {
+    left: 80%;
     width: 18px;
     height: 18px;
+    animation-delay: 1.5s;
+    animation-duration: 3.2s;
 }
 
-.gas-bubble:nth-child(3) {
-    animation-delay: 0.6s;
-    width: 14px;
-    height: 14px;
+.p6 {
+    left: 25%;
+    width: 12px;
+    height: 12px;
+    animation-delay: 2.0s;
+    animation-duration: 4.2s;
 }
 
-@keyframes bubbleFloat {
+.p7 {
+    left: 55%;
+    width: 28px;
+    height: 28px;
+    animation-delay: 2.5s;
+    animation-duration: 3.5s;
+}
 
-    0%,
-    100% {
-        transform: translateY(0) scale(1);
+.p8 {
+    left: 75%;
+    width: 16px;
+    height: 16px;
+    animation-delay: 0.8s;
+    animation-duration: 3.6s;
+}
+
+@keyframes gasRise {
+    0% {
+        transform: translateY(0) scale(0.5) translateX(0);
+        opacity: 0;
+    }
+
+    10% {
         opacity: 0.8;
     }
 
     50% {
-        transform: translateY(-10px) scale(1.1);
-        opacity: 1;
+        transform: translateY(-40px) scale(0.7) translateX(3px);
+        opacity: 0.8;
     }
-}
 
-.bubble {
-    display: none;
-    /* Deprecated */
+    100% {
+        /* Move completely out of the container (height: 60px) */
+        transform: translateY(-80px) scale(0.7) translateX(-3px);
+        opacity: 0.8;
+        /* Keep visible */
+    }
 }
 
 /* Stage 5: Shukaku */

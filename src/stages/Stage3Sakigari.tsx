@@ -123,10 +123,10 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
             result = 'Good! 👍';
             qpChange = 8;
         } else if (currentHeight < targetHeight - 3) {
-            result = '短すぎ... 💦';
+            result = <><ruby>短<rt>みじか</rt></ruby>すぎ💦</> as any;
             qpChange = -20;
         } else {
-            result = '長すぎ... 💦';
+            result = <><ruby>長<rt>なが</rt></ruby>すぎ💦</> as any;
             qpChange = -20;
         }
 
@@ -153,8 +153,8 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-sakigari">
             <div className="game-instruction">
-                <p>い草を45cmの高さで刈り揃えよう！</p>
-                <p className="hint">▲▼ボタンで刈り高さを調整</p>
+                <p><ruby>い草<rt>いぐさ</rt></ruby>を45cmの<ruby>高<rt>たか</rt></ruby>さで<ruby>刈<rt>か</rt></ruby>り<ruby>揃<rt>そろ</rt></ruby>えよう！</p>
+                <p className="hint">▲▼ボタンで<ruby>刈<rt>か</rt></ruby>り<ruby>高<rt>たか</rt></ruby>さを<ruby>調整<rt>ちょうせい</rt></ruby></p>
             </div>
 
             {!isComplete ? (
@@ -168,13 +168,13 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                     </div>
 
                     <div className="height-display">
-                        <p>刈り高さ: <strong>{currentHeight}cm</strong></p>
+                        <p><ruby>刈<rt>か</rt></ruby>り<ruby>高<rt>たか</rt></ruby>さ: <strong>{currentHeight}cm</strong></p>
                     </div>
 
                     {/* 結果をCanvas上に大きく表示 */}
                     {lastResult && (
                         <div className="result-overlay">
-                            <span className={`result-text-large ${lastResult.includes('Perfect') ? 'text-success' : lastResult.includes('Good') ? 'text-warning' : 'text-danger'}`}>
+                            <span className={`result-text-large ${typeof lastResult === 'string' && lastResult.includes('Perfect') ? 'text-success' : typeof lastResult === 'string' && lastResult.includes('Good') ? 'text-warning' : 'text-danger'}`}>
                                 {lastResult}
                             </span>
                         </div>
@@ -185,13 +185,13 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                             variant="secondary"
                             onClick={() => setCurrentHeight(h => Math.max(30, h - 1))}
                         >
-                            ▼ 下げる
+                            <span>▼ <ruby>下<rt>さ</rt></ruby>げる</span>
                         </Button>
                         <Button
                             variant="secondary"
                             onClick={() => setCurrentHeight(h => Math.min(60, h + 1))}
                         >
-                            ▲ 上げる
+                            <span>▲ <ruby>上<rt>あ</rt></ruby>げる</span>
                         </Button>
                     </div>
 
@@ -200,17 +200,17 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                     </Button>
 
                     <div className="game-progress">
-                        <p>カット回数: {cutCount} / {targetCount}</p>
-                        <p>Perfect: {perfectCount}回</p>
+                        <p>カット<ruby>回数<rt>かいすう</rt></ruby>: {cutCount} / {targetCount}</p>
+                        <p>Perfect: {perfectCount}<ruby>回<rt>かい</rt></ruby></p>
                     </div>
                 </>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">🎉 先刈り完了！</p>
+                    <p className="complete-message">🎉 <ruby>先<rt>さき</rt></ruby><ruby>刈<rt>が</rt></ruby>り<ruby>完了<rt>かんりょう</rt></ruby>！</p>
                     <p>Total Score: {totalScore} QP</p>
-                    <p>Perfect率: {Math.round((perfectCount / targetCount) * 100)}%</p>
+                    <p>Perfect<ruby>率<rt>りつ</rt></ruby>: {Math.round((perfectCount / targetCount) * 100)}%</p>
                     {perfectCount >= targetCount / 2 && (
-                        <p className="badge-earned">🏆 「先刈り名人」バッジ獲得！</p>
+                        <p className="badge-earned">🏆 「<ruby>先<rt>さき</rt></ruby><ruby>刈<rt>が</rt></ruby>り<ruby>名人<rt>めいじん</rt></ruby>」バッジ<ruby>獲得<rt>かくとく</rt></ruby>！</p>
                     )}
                     <Button variant="success" fullWidth onClick={() => {
                         if (perfectCount >= targetCount / 2) {
@@ -221,7 +221,7 @@ export function Stage3Sakigari({ onComplete, onNextDay }: StageProps) {
                         }
                         onComplete(totalScore);
                     }}>
-                        ☀️ 次の日へ進む
+                        ☀️ <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>
                     </Button>
                 </div>
             )}

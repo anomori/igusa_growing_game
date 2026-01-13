@@ -3,7 +3,7 @@ import './ProgressBar.css';
 interface ProgressBarProps {
     value: number;
     max?: number;
-    label?: string;
+    label?: React.ReactNode;
     showValue?: boolean;
     color?: 'primary' | 'success' | 'warning' | 'danger';
     size?: 'small' | 'medium' | 'large';

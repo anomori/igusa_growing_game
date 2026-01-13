@@ -178,20 +178,29 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         setResults([...results, result]);
 
         // QP計算
-        // Perfect: 3-4本 かつ 新芽1本 (+10)
-        // Good: 2本 or 5本 かつ 新芽1本 (+5)
-        // Miss: 新芽0本 or 新芽2本以上 or 本数範囲外 (-5)
         let qpChange = 0;
 
-        if (newShootCount !== 1) {
-            // 新芽が含まれていない、または多すぎる場合は失敗
-            qpChange = -15; // 厳しい減点
-        } else {
-            // 新芽が1本ある場合、本数判定
+        // Logic update:
+        // 1. New Shoot >= 1:
+        //    - Count 3-4: Perfect (+10)
+        //    - Count 2 or 5: Good (+5)
+        //    - Else: Miss (-5)
+        // 2. New Shoot == 0:
+        //    - Count 2-3: OK/Good (+5)
+        //    - Else: Miss (-5)
+
+        if (newShootCount >= 1) {
             if (count >= 3 && count <= 4) {
                 qpChange = 10;
-            } else if (count === 2 || count === 5) {
+            } else if (count >= 2 && count <= 5) { // Relaxed slightly to include 2-5 range for Good
                 qpChange = 5;
+            } else {
+                qpChange = -5;
+            }
+        } else {
+            // No new shoot
+            if (count >= 2 && count <= 3) {
+                qpChange = 5; // OK
             } else {
                 qpChange = -5;
             }
@@ -200,7 +209,6 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         dispatch({ type: 'ADD_QP', amount: qpChange });
 
         // 次のセクションを設定（初期値を少し進める）
-        // 残りの幅と残りのカット数から、大体の目安位置を計算
         const remainingWidth = 100 - position;
         const remainingCuts = targetCuts - newCutLines.length;
         const nextStep = remainingCuts > 0 ? remainingWidth / remainingCuts : 10;
@@ -216,16 +224,18 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
 
     const getTotalScore = () => {
         return results.reduce((sum, r) => {
-            if (r.newShootCount !== 1) return sum; // ここは減点を反映せず0加算にするか、減点を反映するか。dispatch済みなので累積計算のみ。
-            // 完了画面での表示用スコア
-            if (r.count >= 3 && r.count <= 4) return sum + 10;
-            if (r.count === 2 || r.count === 5) return sum + 5;
+            if (r.newShootCount >= 1) {
+                if (r.count >= 3 && r.count <= 4) return sum + 10;
+                if (r.count >= 2 && r.count <= 5) return sum + 5;
+            } else {
+                if (r.count >= 2 && r.count <= 3) return sum + 5;
+            }
             return sum;
         }, 0);
     };
 
     const getPerfectCount = () => {
-        return results.filter(r => r.newShootCount === 1 && r.count >= 3 && r.count <= 4).length;
+        return results.filter(r => r.newShootCount >= 1 && r.count >= 3 && r.count <= 4).length;
     };
 
     // プレビュー時の判定（まだカットしてないので予測）
@@ -234,10 +244,15 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         const count = sproutsInSection.length;
         const newShootCount = sproutsInSection.filter(s => s.isNewShoot).length;
 
-        if (newShootCount !== 1) return { text: '⚠ 新芽を1本入れよう', className: 'text-danger' };
-        if (count >= 3 && count <= 4) return { text: '✓ 良い株！', className: 'text-success' };
-        if (count === 2 || count === 5) return { text: '⚠ まあまあ', className: 'text-warning' };
-        return { text: '✕ 本数を調整して', className: 'text-danger' };
+        if (newShootCount >= 1) {
+            if (count >= 3 && count <= 4) return { text: <><ruby>良<rt>よ</rt></ruby>い<ruby>株<rt>かぶ</rt></ruby>！</>, className: 'text-success' };
+            if (count >= 2 && count <= 5) return { text: '⚠ まあまあ', className: 'text-warning' };
+            return { text: <><ruby>本数<rt>ほんすう</rt></ruby>を<ruby>調整<rt>ちょうせい</rt></ruby>して</>, className: 'text-danger' };
+        } else {
+            // No new shoot
+            if (count >= 2 && count <= 3) return { text: '⚠ まあまあ', className: 'text-warning' };
+            return { text: <><ruby>新芽<rt>しんめ</rt></ruby>がないときは2〜3<ruby>本<rt>ほん</rt></ruby>に</>, className: 'text-danger' };
+        }
     };
 
     const previewStatus = getPreviewStatus();
@@ -245,8 +260,8 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-kabuwake">
             <div className="game-instruction">
-                <p>🌱 親株を3〜4本ずつ（新芽1本を含む）に切り分けよう！</p>
-                <p className="hint">色の違う新芽（明るい緑）を<strong>必ず1本</strong>入れてね（残り{targetCuts - cutLines.length}回）</p>
+                <p>🌱 <ruby>親<rt>おや</rt></ruby><ruby>株<rt>かぶ</rt></ruby>を3〜4<ruby>本<rt>ほん</rt></ruby>ずつ（<ruby>新芽<rt>しんめ</rt></ruby>1<ruby>本<rt>ほん</rt></ruby>を<ruby>含<rt>ふく</rt></ruby>む）に<ruby>切<rt>き</rt></ruby>り<ruby>分<rt>わ</rt></ruby>けよう！</p>
+                <p className="hint"><ruby>色<rt>いろ</rt></ruby>の<ruby>違<rt>ちが</rt></ruby>う<ruby>新芽<rt>しんめ</rt></ruby>（<ruby>明<rt>あか</rt></ruby>るい<ruby>緑<rt>みどり</rt></ruby>）を<strong><ruby>必<rt>かなら</rt></ruby>ず1<ruby>本<rt>ほん</rt></ruby></strong><ruby>入<rt>い</rt></ruby>れてね（<ruby>残<rt>のこ</rt></ruby>り{targetCuts - cutLines.length}<ruby>回<rt>かい</rt></ruby>）</p>
             </div>
 
             <div className="kabuwake-field" ref={containerRef}>
@@ -266,22 +281,22 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                             className="cut-slider"
                         />
                     </div>
-                    <p className="slider-instruction">スライダーを動かして位置を調整 →</p>
+                    <p className="slider-instruction">スライダーを<ruby>動<rt>うご</rt></ruby>かして<ruby>位置<rt>いち</rt></ruby>を<ruby>調整<rt>ちょうせい</rt></ruby> →</p>
                 </div>
             )}
 
             <div className="preview-info">
                 <p>この範囲: <strong>{
                     sprouts.filter(s => s.x >= currentSection[0] && s.x < currentSection[1]).length
-                }本</strong></p>
+                }<ruby>本<rt>ほん</rt></ruby></strong></p>
                 <p className={previewStatus.className}>
                     {previewStatus.text}
                 </p>
             </div>
 
             <div className="game-progress">
-                <p>切り分け回数: {cutLines.length} / {targetCuts}</p>
-                <p>Perfect: {getPerfectCount()}回</p>
+                <p><ruby>切<rt>き</rt></ruby>り<ruby>分<rt>わ</rt></ruby>け<ruby>回数<rt>かいすう</rt></ruby>: {cutLines.length} / {targetCuts}</p>
+                <p>Perfect: {getPerfectCount()}<ruby>回<rt>かい</rt></ruby></p>
             </div>
 
             {!isComplete ? (
@@ -291,14 +306,14 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                     onClick={() => handleCut(currentSection[1])}
                     disabled={currentSection[1] <= currentSection[0] + 5}
                 >
-                    切り分ける！
+                    <span><ruby>切<rt>き</rt></ruby>り<ruby>分<rt>わ</rt></ruby>ける！</span>
                 </Button>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">🎉 株分け完了！</p>
-                    <p>スコア: {getTotalScore()} QP獲得</p>
+                    <p className="complete-message">🎉 <ruby>株<rt>かぶ</rt></ruby><ruby>分<rt>わ</rt></ruby>け<ruby>完了<rt>かんりょう</rt></ruby>！</p>
+                    <p>スコア: {getTotalScore()} QP<ruby>獲得<rt>かくとく</rt></ruby></p>
                     {getPerfectCount() === targetCuts && (
-                        <p className="badge-earned">🏆 「株分け名人」バッジ獲得！</p>
+                        <p className="badge-earned">🏆 「<ruby>株<rt>かぶ</rt></ruby><ruby>分<rt>わ</rt></ruby>け<ruby>名人<rt>めいじん</rt></ruby>」バッジ<ruby>獲得<rt>かくとく</rt></ruby>！</p>
                     )}
                     <Button variant="success" fullWidth onClick={() => {
                         if (getPerfectCount() === targetCuts) {
@@ -309,7 +324,7 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                         }
                         onComplete(getTotalScore());
                     }}>
-                        ☀️ 次の日へ進む
+                        ☀️ <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>
                     </Button>
                 </div>
             )}

@@ -1,6 +1,7 @@
 import { useGame } from '../../context/GameContext';
 import { getStageByDay, getMoodByQP, STAGES } from '../../types/game';
 import { IgusaChan } from '../character/IgusaChan';
+import { FuriganaText } from '../common/FuriganaText';
 import './StatusBar.css';
 
 export function StatusBar() {
@@ -20,7 +21,7 @@ export function StatusBar() {
         <div className="status-bar">
             <div className="status-left">
                 <span className="status-month">{currentStageInfo.month}</span>
-                <span className="status-stage">（{currentStageInfo.name}）</span>
+                <span className="status-stage">（<FuriganaText text={currentStageInfo.name} />）</span>
             </div>
             <div className="status-center">
                 <span className="status-day">{state.currentDay}/30</span>

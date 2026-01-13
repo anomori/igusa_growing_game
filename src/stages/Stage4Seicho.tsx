@@ -285,11 +285,11 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
             case 'net':
                 return (
                     <div className="event-card event-net">
-                        <h3>網上げの時間！</h3>
-                        <p>い草が伸びてきたよ。網を<strong>10cm</strong>上げよう！</p>
-                        <p className="net-info">現在の網の高さ: {netHeight * 10}cm</p>
+                        <h3><ruby>網<rt>あみ</rt></ruby><ruby>上<rt>あ</rt></ruby>げの<ruby>時間<rt>じかん</rt></ruby>！</h3>
+                        <p><ruby>い草<rt>いぐさ</rt></ruby>が<ruby>伸<rt>の</rt></ruby>びてきたよ。<ruby>網<rt>あみ</rt></ruby>を<strong>10cm</strong><ruby>上<rt>あ</rt></ruby>げよう！</p>
+                        <p className="net-info"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>網<rt>あみ</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さ: {netHeight * 10}cm</p>
                         <div className="net-slider-container">
-                            <label>目標の高さ: {targetNetHeight * 10}cm</label>
+                            <label><ruby>目標<rt>もくひょう</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さ: {targetNetHeight * 10}cm</label>
                             <input
                                 type="range"
                                 min={1}
@@ -307,15 +307,15 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                             </p>
                         </div>
                         <Button variant="primary" onClick={handleNetRaise}>
-                            決定！網を上げる
+                            <span><ruby>決定<rt>けってい</rt></ruby>！<ruby>網<rt>あみ</rt></ruby>を<ruby>上<rt>あ</rt></ruby>げる</span>
                         </Button>
                     </div>
                 );
             case 'bug':
                 return (
                     <div className="event-card event-bug">
-                        <h3>害虫発生！</h3>
-                        <p style={{ fontSize: '12px', margin: '4px 0' }}>イグサシンムシガが出現！タップで駆除しよう！</p>
+                        <h3><ruby>害虫<rt>がいちゅう</rt></ruby><ruby>発生<rt>はっせい</rt></ruby>！</h3>
+                        <p style={{ fontSize: '12px', margin: '4px 0' }}>イグサシンムシガが<ruby>出現<rt>しゅつげん</rt></ruby>！タップで<ruby>駆除<rt>くじょ</rt></ruby>しよう！</p>
                         <div className="bug-canvas-container" style={{ position: 'relative', height: '120px', borderRadius: '8px', overflow: 'hidden', background: 'linear-gradient(to bottom, #E0F7FA 80%, #8D6E63 80%)' }}>
                             {/* Canvas背景: い草畑 */}
                             <canvas
@@ -362,30 +362,42 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                 </div>
                             ))}
                         </div>
-                        <p style={{ margin: '4px 0' }}>残り害虫: {bugs.length}匹</p>
+                        <p style={{ margin: '4px 0' }}><ruby>残<rt>のこ</rt></ruby>り<ruby>害虫<rt>がいちゅう</rt></ruby>: {bugs.length}<ruby>匹<rt>ひき</rt></ruby></p>
                         <Button variant="warning" onClick={handleBugComplete}>
-                            駆除完了
+                            <span><ruby>駆除<rt>くじょ</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby></span>
                         </Button>
                     </div>
                 );
             case 'gas':
                 return (
                     <div className="event-card event-gas">
-                        <h3 style={{ marginBottom: '4px' }}>ガス発生！間断かん水をしよう</h3>
+                        <h3 style={{ marginBottom: '4px' }}>ガス<ruby>発生<rt>はっせい</rt></ruby>！<ruby>間断<rt>かんだん</rt></ruby>かん<ruby>水<rt>すい</rt></ruby>をしよう</h3>
                         <p style={{ fontSize: '11px', color: '#666', margin: '0 0 8px 0' }}>
-                            田んぼの水を抜いて乾かし、また水を入れる。根に酸素を供給してガスを抜きます。
+                            <ruby>田<rt>た</rt></ruby>んぼの<ruby>水<rt>みず</rt></ruby>を<ruby>抜<rt>ぬ</rt></ruby>いて<ruby>乾<rt>かわ</rt></ruby>かし、また<ruby>水<rt>みず</rt></ruby>を<ruby>入<rt>い</rt></ruby>れる。<ruby>根<rt>ね</rt></ruby>に<ruby>酸素<rt>さんそ</rt></ruby>を<ruby>供給<rt>きょうきゅう</rt></ruby>してガスを<ruby>抜<rt>ぬ</rt></ruby>きます。
                         </p>
                         <div className={`water-field water-${waterPhase}`} style={{ height: '60px', margin: '8px 0' }}>
-                            <div className="gas-bubbles" style={{ gap: '20px' }}>
-                                {/* 2サイクル以上で泡は0になる */}
-                                {drainCycles < 1 && <span className="gas-bubble"></span>}
-                                {drainCycles < 1 && <span className="gas-bubble"></span>}
-                                {drainCycles < 2 && <span className="gas-bubble"></span>}
+                            <div className="gas-bubbles-container">
+                                {drainCycles < 1 && (
+                                    <>
+                                        <div className="gas-particle p1" />
+                                        <div className="gas-particle p2" />
+                                        <div className="gas-particle p3" />
+                                        <div className="gas-particle p4" />
+                                        <div className="gas-particle p5" />
+                                    </>
+                                )}
+                                {drainCycles < 2 && (
+                                    <>
+                                        <div className="gas-particle p6" />
+                                        <div className="gas-particle p7" />
+                                        <div className="gas-particle p8" />
+                                    </>
+                                )}
                             </div>
                             <p className="water-status" style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>
-                                {waterPhase === 'flooded' && '水あり'}
-                                {waterPhase === 'draining' && '排水中...'}
-                                {waterPhase === 'drained' && '乾燥'}
+                                {waterPhase === 'flooded' && <><ruby>水<rt>みず</rt></ruby>あり</>}
+                                {waterPhase === 'draining' && <><ruby>排水<rt>はいすい</rt></ruby><ruby>中<rt>ちゅう</rt></ruby>...</>}
+                                {waterPhase === 'drained' && <><ruby>乾燥<rt>かんそう</rt></ruby></>}
                             </p>
                         </div>
                         <div className="water-controls" style={{ marginBottom: '8px' }}>
@@ -395,7 +407,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                 onClick={handleDrain}
                                 disabled={waterPhase !== 'flooded' || drainCycles >= 2}
                             >
-                                抜く
+                                <span><ruby>抜<rt>ぬ</rt></ruby>く</span>
                             </Button>
                             <Button
                                 variant="primary"
@@ -403,12 +415,12 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                 onClick={handleFlood}
                                 disabled={waterPhase !== 'drained' || drainCycles >= 2}
                             >
-                                入れる
+                                <span><ruby>入<rt>い</rt></ruby>れる</span>
                             </Button>
                         </div>
                         <p style={{ margin: '4px 0' }}>
                             {drainCycles >= 2
-                                ? '✓ ガス抜き完了！'
+                                ? <>✓ ガス<ruby>抜<rt>ぬ</rt></ruby>き<ruby>完了<rt>かんりょう</rt></ruby>！</>
                                 : `サイクル: ${drainCycles}/2回`}
                         </p>
                         {/* 完了ボタン削除: 次の日へボタンで進行 */}
@@ -417,10 +429,10 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
             case 'typhoon':
                 return (
                     <div className="event-card event-typhoon">
-                        <h3>台風接近！</h3>
-                        <p>台風が来るよ！網を補強して備えよう。</p>
+                        <h3><ruby>台風<rt>たいふう</rt></ruby><ruby>接近<rt>せっきん</rt></ruby>！</h3>
+                        <p><ruby>台風<rt>たいふう</rt></ruby>ができるよ！<ruby>網<rt>あみ</rt></ruby>を<ruby>補強<rt>ほきょう</rt></ruby>して<ruby>備<rt>そな</rt></ruby>えよう。</p>
                         <Button variant="danger" onClick={handleTyphoonPrep}>
-                            網を補強する
+                            <span><ruby>網<rt>あみ</rt></ruby>を<ruby>補強<rt>ほきょう</rt></ruby>する</span>
                         </Button>
                     </div>
                 );
@@ -434,7 +446,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-seicho">
             <div className="game-instruction">
-                <p>成長期を乗り越えよう！</p>
+                <p><ruby>成長期<rt>せいちょうき</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>えよう！</p>
                 <p className="hint">Day {day} / 20</p>
             </div>
 
@@ -450,8 +462,8 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                 getEventContent()
             ) : (
                 <div className="day-status">
-                    <p>🌱 い草が順調に育っています</p>
-                    <p>網の高さ: {netHeight * 10}cm</p>
+                    <p>🌱 <ruby>い草<rt>いぐさ</rt></ruby>が<ruby>順調<rt>じゅんちょう</rt></ruby>に<ruby>育<rt>そだ</rt></ruby>っています</p>
+                    <p><ruby>網<rt>あみ</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さ: {netHeight * 10}cm</p>
                 </div>
             )}
 
@@ -462,20 +474,20 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                     onClick={handleNextDay}
                     disabled={currentEvent !== 'gas' && currentEvent !== null && !eventHandled}
                 >
-                    次の日へ →
+                    <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ →</span>
                 </Button>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">🎉 成長期完了！</p>
-                    <p>獲得スコア: {totalScore} QP</p>
+                    <p className="complete-message">🎉 <ruby>成長期<rt>せいちょうき</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby>！</p>
+                    <p><ruby>獲得<rt>かくとく</rt></ruby>スコア: {totalScore} QP</p>
                     <Button variant="success" fullWidth onClick={() => onComplete(totalScore)}>
-                        ☀️ 次の日へ進む
+                        ☀️ <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>
                     </Button>
                 </div>
             )}
 
             <div className="game-progress">
-                <p>累計スコア: {totalScore} QP</p>
+                <p><ruby>累計<rt>るいけい</rt></ruby>スコア: {totalScore} QP</p>
             </div>
         </div>
     );

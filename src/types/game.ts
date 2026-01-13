@@ -91,6 +91,7 @@ export type GameAction =
     | { type: 'NEXT_DAY' }
     | { type: 'JUMP_TO_DAY'; day: number }
     | { type: 'ADD_QP'; amount: number }
+    | { type: 'SET_QP'; amount: number }
     | { type: 'COMPLETE_STAGE'; stage: StageType; score: number }
     | { type: 'ANSWER_QUIZ'; correct: boolean }
     | { type: 'EARN_BADGE'; badge: Badge }
@@ -99,14 +100,14 @@ export type GameAction =
 
 // ステージ設定
 export const STAGES: StageInfo[] = [
-    { type: 'kabuwake', name: '株分け', icon: '🌱', dayRange: [1, 2], month: '11月中旬', description: '親株から苗を分ける' },
-    { type: 'uetsuke', name: '植え付け', icon: '🌿', dayRange: [3, 5], month: '11月下旬', description: '本田へ植え付け' },
-    { type: 'sakigari', name: '先刈り', icon: '✂️', dayRange: [6, 8], month: '5月上旬', description: '先端を刈り揃える' },
-    { type: 'seicho', name: '成長期', icon: '📏', dayRange: [9, 20], month: '5月〜6月', description: '網張り・水管理' },
-    { type: 'shukaku', name: '収穫', icon: '🌾', dayRange: [21, 23], month: '6月下旬', description: '刈り取り' },
-    { type: 'dorozome', name: '泥染め', icon: '🎨', dayRange: [24, 26], month: '収穫後', description: '泥染め・乾燥' },
-    { type: 'seishoku', name: '製織', icon: '🧵', dayRange: [27, 29], month: '通年', description: '畳表に織り上げる' },
-    { type: 'kensa', name: '検査', icon: '✅', dayRange: [30, 30], month: '仕上げ', description: '品質チェック' },
+    { type: 'kabuwake', name: '{株|かぶ}{分|わ}け', icon: '🌱', dayRange: [1, 2], month: '11月中旬', description: '{親株|おやかぶ}から{苗|なえ}を{分|わ}ける' },
+    { type: 'uetsuke', name: '{植|う}え{付|つ}け', icon: '🌿', dayRange: [3, 5], month: '11月下旬', description: '{本田|ほんでん}へ{植|う}え{付|つ}け' },
+    { type: 'sakigari', name: '{先|さき}{刈|が}り', icon: '✂️', dayRange: [6, 8], month: '5月上旬', description: '{先端|せんたん}を{刈|か}り{揃|そろ}える' },
+    { type: 'seicho', name: '{成長期|せいちょうき}', icon: '📏', dayRange: [9, 20], month: '5月〜6月', description: '{網|あみ}{張|は}り・{水|みず}{管理|かんり}' },
+    { type: 'shukaku', name: '{収穫|しゅうかく}', icon: '🌾', dayRange: [21, 23], month: '6月下旬', description: '{刈|か}り{取|と}り' },
+    { type: 'dorozome', name: '{泥|どろ}{染|ぞ}め', icon: '🎨', dayRange: [24, 26], month: '収穫後', description: '{泥|どろ}{染|ぞ}め・{乾燥|かんそう}' },
+    { type: 'seishoku', name: '{製織|せいしょく}', icon: '🧵', dayRange: [27, 29], month: '通年', description: '{畳表|たたみおもて}に{織|お}り{上|あ}げる' },
+    { type: 'kensa', name: '{検査|けんさ}', icon: '✅', dayRange: [30, 30], month: '仕上げ', description: '{品質|ひんしつ}チェック' },
 ];
 
 // 日数からステージを取得

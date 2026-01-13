@@ -25,7 +25,7 @@ npm install
 npm run dev
 
 # ブラウザで http://localhost:5173 を開く
-```
+``` 
 
 ## 📚 学べる知識
 
@@ -61,11 +61,27 @@ npm run preview  # ビルドプレビュー
 npm run deploy   # GitHub Pagesにデプロイ
 ```
 
+## 🐛 デバッグモード
+
+開発・テスト用に、任意のステージへジャンプできる機能があります。
+
+### 有効化する方法
+
+1. `src/utils/debug.ts` を開く
+2. `DEBUG_MODE = false` を `DEBUG_MODE = true` に変更
+
+```typescript
+// src/utils/debug.ts
+export const DEBUG_MODE = true; // ← trueに変更
+```
+
+3. 画面左上に赤い「🔧 デバッグ」ボタンが表示される
+4. ボタンをクリックするとパネルが開く
+   - ステージアイコン（🌱, 🌿, ✂️ 等）で任意のステージにジャンプ
+   - 「🏠 ホームへ戻る」でタイトル画面に戻る
+
+> ⚠️ **注意**: 本番環境・デプロイ前には必ず `DEBUG_MODE = false` に戻してください
+
 ## 📄 ライセンス
 
 MIT License
-
-## 🙏 謝辞
-
-- い草・畳に関する情報: 農林水産省、熊本県い業生産販売振興協会
-- 八代市のい草農家の皆様

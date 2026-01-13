@@ -26,7 +26,7 @@ export function StageProgress() {
                     const status = getStageStatus(stage.type);
                     return (
                         <div key={stage.type} className="stage-item-wrapper">
-                            <div className={`stage-item stage-${status}`} title={stage.name}>
+                            <div className={`stage-item stage-${status}`} title={stage.name.replace(/\{([^|]+)\|[^}]+\}/g, '$1')}>
                                 <StatusIcon type={stage.type} size={18} />
                             </div>
                             {index < STAGES.length - 1 && (

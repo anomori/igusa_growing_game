@@ -20,14 +20,36 @@ interface Defect {
 export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [defects] = useState<Defect[]>(() => {
-        // ランダムに5-8個の欠陥を配置
+        // ランダムに5-8個の欠陥を配置（重なり防止）
         const count = 5 + Math.floor(Math.random() * 4);
-        return Array.from({ length: count }, (_, i) => ({
-            id: i,
-            x: 10 + Math.random() * 80,
-            y: 10 + Math.random() * 80,
-            found: false,
-        }));
+        const newDefects: Defect[] = [];
+        const MIN_DISTANCE = 15; // 最小距離（%）
+
+        for (let i = 0; i < count; i++) {
+            let x, y, valid;
+            let attempts = 0;
+
+            do {
+                valid = true;
+                x = 10 + Math.random() * 80;
+                y = 10 + Math.random() * 80;
+                attempts++;
+
+                // 既存の欠陥との距離をチェック
+                for (const existing of newDefects) {
+                    const dist = Math.sqrt(Math.pow(x - existing.x, 2) + Math.pow(y - existing.y, 2));
+                    if (dist < MIN_DISTANCE) {
+                        valid = false;
+                        break;
+                    }
+                }
+
+                // 無限ループ防止（100回試行してもダメなら諦めて配置）
+            } while (!valid && attempts < 100);
+
+            newDefects.push({ id: i, x, y, found: false });
+        }
+        return newDefects;
     });
     const [foundDefects, setFoundDefects] = useState<number[]>([]);
     const [wrongClicks, setWrongClicks] = useState(0);
@@ -79,19 +101,19 @@ export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
 
     const getRankMessage = () => {
         switch (finalRank) {
-            case 'S': return '最高級！い草の長さ・色・光沢すべて完璧！';
-            case 'A': return '高品質！5年後も明るい飴色に変化します';
-            case 'B': return '標準品質。若干の黒筋がありますが使用には問題なし';
-            case 'C': return '色ムラあり。耐久性は低めです';
-            case 'D': return '規格外...出荷不可です。もう一度挑戦しよう！';
+            case 'S': return <><ruby>最高級<rt>さいこうきゅう</rt></ruby>！<ruby>い草<rt>いぐさ</rt></ruby>の<ruby>長<rt>なが</rt></ruby>さ・<ruby>色<rt>いろ</rt></ruby>・<ruby>光沢<rt>こうたく</rt></ruby>すべて<ruby>完璧<rt>かんぺき</rt></ruby>！</>;
+            case 'A': return <><ruby>高品質<rt>こうひんしつ</rt></ruby>！5<ruby>年後<rt>ねんご</rt></ruby>も<ruby>明<rt>あか</rt></ruby>るい<ruby>飴色<rt>あめいろ</rt></ruby>に<ruby>変化<rt>へんか</rt></ruby>します</>;
+            case 'B': return <><ruby>標準<rt>ひょうじゅん</rt></ruby><ruby>品質<rt>ひんしつ</rt></ruby>。<ruby>若干<rt>じゃっかん</rt></ruby>の<ruby>黒筋<rt>くろすじ</rt></ruby>がありますが<ruby>使用<rt>しよう</rt></ruby>には<ruby>問題<rt>もんだい</rt></ruby>なし</>;
+            case 'C': return <><ruby>色<rt>いろ</rt></ruby>ムラあり。<ruby>耐久性<rt>たいきゅうせい</rt></ruby>は<ruby>低<rt>ひく</rt></ruby>めです</>;
+            case 'D': return <><ruby>規格外<rt>きかくがい</rt></ruby>...<ruby>出荷<rt>しゅっか</rt></ruby><ruby>不可<rt>ふか</rt></ruby>です。もう<ruby>一度<rt>いちど</rt></ruby><ruby>挑戦<rt>ちょうせん</rt></ruby>しよう！</>;
         }
     };
 
     return (
         <div className="stage-game stage-kensa">
             <div className="game-instruction">
-                <p>畳表の傷を見つけよう！</p>
-                <p className="hint">傷や欠陥をタップしてマーキング</p>
+                <p><ruby>畳表<rt>たたみおもて</rt></ruby>の<ruby>傷<rt>きず</rt></ruby>を<ruby>見<rt>み</rt></ruby>つけよう！</p>
+                <p className="hint"><ruby>傷<rt>きず</rt></ruby>や<ruby>欠陥<rt>けっかん</rt></ruby>をタップしてマーキング</p>
             </div>
 
             {!isComplete ? (
@@ -129,11 +151,11 @@ export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
 
 
                     <div className="inspection-info">
-                        <p>発見した傷: {foundDefects.length} / {defects.length}</p>
-                        <p>誤クリック: {wrongClicks}回</p>
+                        <p><ruby>発見<rt>はっけん</rt></ruby>した<ruby>傷<rt>きず</rt></ruby>: {foundDefects.length} / {defects.length}</p>
+                        <p><ruby>誤<rt>ご</rt></ruby>クリック: {wrongClicks}<ruby>回<rt>かい</rt></ruby></p>
                         {foundDefects.length < 3 && (
                             <p className="text-warning" style={{ fontSize: '12px' }}>
-                                ※あと{3 - foundDefects.length}個見つけて！
+                                ※あと{3 - foundDefects.length}<ruby>個<rt>こ</rt></ruby><ruby>見<rt>み</rt></ruby>つけて！
                             </p>
                         )}
                     </div>
@@ -144,7 +166,7 @@ export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
                         onClick={handleComplete}
                         disabled={!canComplete || foundDefects.length < 3}
                     >
-                        検査完了
+                        <span><ruby>検査<rt>けんさ</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby></span>
                     </Button>
                 </>
             ) : (
@@ -164,18 +186,18 @@ export function Stage8Kensa({ onComplete, onNextDay }: StageProps) {
                     <p className="rank-message">{getRankMessage()}</p>
 
                     <div className="final-stats">
-                        <p>最終QP: <strong>{state.qualityPoints}</strong></p>
-                        <p>クイズ正解: {state.quizCorrect} / {state.quizAnswered}</p>
+                        <p><ruby>最終<rt>さいしゅう</rt></ruby>QP: <strong>{state.qualityPoints}</strong></p>
+                        <p>クイズ<ruby>正解<rt>せいかい</rt></ruby>: {state.quizCorrect} / {state.quizAnswered}</p>
                     </div>
 
                     <div className="tatami-preview">
                         <div className={`finished-tatami rank-${finalRank.toLowerCase()}`}>
-                            完成した畳表
+                            <ruby>完成<rt>かんせい</rt></ruby>した<ruby>畳表<rt>たたみおもて</rt></ruby>
                         </div>
                     </div>
 
                     <Button variant="primary" fullWidth onClick={() => onComplete(0)}>
-                        結果を見る
+                        <span><ruby>結果<rt>けっか</rt></ruby>を<ruby>見<rt>み</rt></ruby>る</span>
                     </Button>
                 </div>
             )}

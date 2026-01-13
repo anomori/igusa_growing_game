@@ -138,10 +138,10 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
 
     const getQualityLabel = (quality: IgusaItem['quality']) => {
         switch (quality) {
-            case 'good': return '良品';
-            case 'tip': return '穂先残り';
-            case 'uneven': return '色ムラ';
-            case 'damaged': return '傷あり';
+            case 'good': return <><ruby>良<rt>りょう</rt></ruby><ruby>品質<rt>ひんしつ</rt></ruby></>;
+            case 'tip': return <><ruby>穂先<rt>ほさき</rt></ruby><ruby>残<rt>のこ</rt></ruby>り</>;
+            case 'uneven': return <><ruby>色<rt>いろ</rt></ruby>ムラ</>;
+            case 'damaged': return <><ruby>傷<rt>きず</rt></ruby>あり</>;
         }
     };
 
@@ -153,7 +153,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
         const base = 4000;
         const additional = Math.floor((density / 100) * 4000);
         const count = base + additional;
-        return `${count.toLocaleString()}本`;
+        return <>{count.toLocaleString()}<ruby>本<rt>ほん</rt></ruby></>;
     };
 
     const isComplete = weavingCount >= targetWeaveCount;
@@ -161,9 +161,9 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-seishoku">
             <div className="game-instruction">
-                <p>{phase === 'selection' ? 'い草を選別しよう！' : '畳表を織ろう！'}</p>
+                <p>{phase === 'selection' ? <><ruby>い草<rt>いぐさ</rt></ruby>を<ruby>選別<rt>せんべつ</rt></ruby>しよう！</> : <><ruby>畳表<rt>たたみおもて</rt></ruby>を<ruby>織<rt>お</rt></ruby>ろう！</>}</p>
                 {phase === 'selection' && (
-                    <p className="hint">良品質のい草を選んでタップ</p>
+                    <p className="hint"><ruby>良<rt>りょう</rt></ruby><ruby>品質<rt>ひんしつ</rt></ruby>の<ruby>い草<rt>いぐさ</rt></ruby>を<ruby>選<rt>えら</rt></ruby>んでタップ</p>
                 )}
             </div>
 
@@ -183,13 +183,13 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                     </div>
 
                     <p className="selection-hint">
-                        良品質（穂先と根元がカット済み、色が均一）を選ぼう！
+                        <ruby>良<rt>りょう</rt></ruby><ruby>品質<rt>ひんしつ</rt></ruby>（<ruby>穂先<rt>ほさき</rt></ruby>と<ruby>根元<rt>ねもと</rt></ruby>がカット<ruby>済<rt>ず</rt></ruby>み、<ruby>色<rt>いろ</rt></ruby>が<ruby>均一<rt>きんいつ</rt></ruby>）を<ruby>選<rt>えら</rt></ruby>ぼう！
                     </p>
 
-                    <p>選別スコア: {selectionScore}</p>
+                    <p><ruby>選別<rt>せんべつ</rt></ruby>スコア: {selectionScore}</p>
 
                     <Button variant="success" fullWidth onClick={handleSelectionComplete}>
-                        選別完了 → 織り込みへ
+                        <span><ruby>選別<rt>せんべつ</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby> → <ruby>織<rt>お</rt></ruby>り<ruby>込<rt>こ</rt></ruby>みへ</span>
                     </Button>
                 </div>
             ) : !isComplete ? (
@@ -208,15 +208,15 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                         </div>
 
                         <div className="direction-indicator">
-                            <span className={currentDirection === 'left' ? 'active' : ''}>[ 左 ]</span>
-                            <span className={currentDirection === 'right' ? 'active' : ''}>[ 右 ]</span>
+                            <span className={currentDirection === 'left' ? 'active' : ''}>[ <ruby>左<rt>ひだり</rt></ruby> ]</span>
+                            <span className={currentDirection === 'right' ? 'active' : ''}>[ <ruby>右<rt>みぎ</rt></ruby> ]</span>
                         </div>
                     </div>
 
                     <ProgressBar
                         value={timeLeft}
                         max={1.5}
-                        label="残り時間"
+                        label={<><ruby>残<rt>のこ</rt></ruby>り<ruby>時間<rt>じかん</rt></ruby></>}
                         color={timeLeft > 1 ? 'success' : timeLeft > 0.5 ? 'warning' : 'danger'}
                     />
 
@@ -226,37 +226,37 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                             size="large"
                             onClick={() => handleSwipe('left')}
                         >
-                            ← 左
+                            <span>← <ruby>左<rt>ひだり</rt></ruby></span>
                         </Button>
                         <Button
                             variant="primary"
                             size="large"
                             onClick={() => handleSwipe('right')}
                         >
-                            右 →
+                            <span><ruby>右<rt>みぎ</rt></ruby> →</span>
                         </Button>
                     </div>
 
                     <ProgressBar
                         value={Math.round(density * 10) / 10}
                         max={100}
-                        label="密度"
+                        label={<><ruby>密度<rt>みつど</rt></ruby></>}
                         showValue
                         color={density >= 70 ? 'success' : density >= 50 ? 'warning' : 'danger'}
                     />
 
                     <div className="weave-info">
-                        <p>織り込み: {weavingCount} / {targetWeaveCount}</p>
-                        <p>い草本数: {getIgusaByCount()}</p>
+                        <p><ruby>織<rt>お</rt></ruby>り<ruby>込<rt>こ</rt></ruby>み: {weavingCount} / {targetWeaveCount}</p>
+                        <p><ruby>い草<rt>いぐさ</rt></ruby><ruby>本数<rt>ほんすう</rt></ruby>: {getIgusaByCount()}</p>
                     </div>
                 </div>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">製織完了！</p>
-                    <p>密度: {density.toFixed(1)}%（{getIgusaByCount()}）</p>
+                    <p className="complete-message"><ruby>製織<rt>せいしょく</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby>！</p>
+                    <p><ruby>密度<rt>みつど</rt></ruby>: {density.toFixed(1)}%（{getIgusaByCount()}）</p>
                     <p>スコア: {totalScore} QP</p>
                     {density >= 90 && (
-                        <p className="badge-earned">🏆 「織師の匠」バッジ獲得！</p>
+                        <p className="badge-earned">🏆 「<ruby>織師<rt>おりし</rt></ruby>の<ruby>匠<rt>たくみ</rt></ruby>」バッジ<ruby>獲得<rt>かくとく</rt></ruby>！</p>
                     )}
                     <Button variant="success" fullWidth onClick={() => {
                         if (density >= 90) {
@@ -267,7 +267,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
                         }
                         onComplete(totalScore);
                     }}>
-                        ☀️ 次の日へ進む
+                        ☀️ <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>
                     </Button>
                 </div>
             )}

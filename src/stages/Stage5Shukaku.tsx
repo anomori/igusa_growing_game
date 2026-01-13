@@ -134,31 +134,31 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-shukaku">
             <div className="game-instruction">
-                <p>い草を刈り取ろう！</p>
+                <p><ruby>い草<rt>いぐさ</rt></ruby>を<ruby>刈<rt>か</rt></ruby>り<ruby>取<rt>と</rt></ruby>ろう！</p>
                 {!timeOfDay ? (
-                    <p className="hint">まず収穫する時間帯を選ぼう</p>
+                    <p className="hint">まず<ruby>収穫<rt>しゅうかく</rt></ruby>する<ruby>時間<rt>じかん</rt></ruby><ruby>帯<rt>たい</rt></ruby>を<ruby>選<rt>えら</rt></ruby>ぼう</p>
                 ) : (
-                    <p className="hint">青いい草をタップ！赤は避けて</p>
+                    <p className="hint"><ruby>青<rt>あお</rt></ruby>い<ruby>い草<rt>いぐさ</rt></ruby>をタップ！<ruby>赤<rt>あか</rt></ruby>は<ruby>避<rt>さ</rt></ruby>けて</p>
                 )}
             </div>
 
             {!timeOfDay ? (
                 <div className="time-selection">
-                    <h3>【時間帯を選んでください】</h3>
+                    <h3>【<ruby>時間<rt>じかん</rt></ruby><ruby>帯<rt>たい</rt></ruby>を<ruby>選<rt>えら</rt></ruby>んでください】</h3>
                     <div className="time-options">
                         <button className="time-option" onClick={() => handleTimeSelect('morning')}>
                             <div className="icon-time morning" />
-                            <span className="time-label">早朝</span>
+                            <span className="time-label"><ruby>早朝<rt>そうちょう</rt></ruby></span>
                             <span className="time-bonus">+10 QP</span>
                         </button>
                         <button className="time-option noon" onClick={() => handleTimeSelect('noon')}>
                             <div className="icon-time noon" />
-                            <span className="time-label">昼間</span>
+                            <span className="time-label"><ruby>昼間<rt>ひるま</rt></ruby></span>
                             <span className="time-penalty">-15 QP</span>
                         </button>
                         <button className="time-option" onClick={() => handleTimeSelect('evening')}>
                             <div className="icon-time evening" />
-                            <span className="time-label">夕方</span>
+                            <span className="time-label"><ruby>夕方<rt>ゆうがた</rt></ruby></span>
                             <span className="time-bonus">+10 QP</span>
                         </button>
                     </div>
@@ -166,8 +166,8 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
             ) : gameActive ? (
                 <>
                     <div className="harvest-header">
-                        <span>時間: {gameTime}秒</span>
-                        <span>収穫: {cutCount}</span>
+                        <span><ruby>時間<rt>じかん</rt></ruby>: {gameTime}<ruby>秒<rt>びょう</rt></ruby></span>
+                        <span><ruby>収穫<rt>しゅうかく</rt></ruby>: {cutCount}</span>
                         <span>コンボ: {comboCount}</span>
                     </div>
 
@@ -191,12 +191,12 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
                 </>
             ) : (
                 <div className="stage-complete">
-                    <p className="complete-message">収穫完了！</p>
-                    <p>刈り取り: {cutCount}本</p>
-                    <p>最大コンボ: {maxCombo}</p>
+                    <p className="complete-message"><ruby>収穫<rt>しゅうかく</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby>！</p>
+                    <p><ruby>刈<rt>か</rt></ruby>り<ruby>取<rt>と</rt></ruby>り: {cutCount}<ruby>本<rt>ほん</rt></ruby></p>
+                    <p><ruby>最大<rt>さいだい</rt></ruby>コンボ: {maxCombo}</p>
                     <p>スコア: {score} QP</p>
                     {maxCombo >= 50 && (
-                        <p className="badge-earned">🏆 「収穫マスター」バッジ獲得！</p>
+                        <p className="badge-earned">🏆 「<ruby>収穫<rt>しゅうかく</rt></ruby>マスター」バッジ<ruby>獲得<rt>かくとく</rt></ruby>！</p>
                     )}
                     <Button variant="success" fullWidth onClick={() => {
                         if (maxCombo >= 50) {
@@ -207,7 +207,7 @@ export function Stage5Shukaku({ onComplete, onNextDay }: StageProps) {
                         }
                         onComplete(score);
                     }}>
-                        ☀️ 次の日へ進む
+                        ☀️ <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>
                     </Button>
                 </div>
             )}

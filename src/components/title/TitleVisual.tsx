@@ -10,8 +10,8 @@ export function TitleVisual() {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const width = 300;
-        const height = 180;
+        const width = 240;
+        const height = 144;
         const dpr = window.devicePixelRatio || 1;
 
         canvas.width = width * dpr;

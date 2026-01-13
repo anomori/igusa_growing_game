@@ -253,13 +253,13 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
     return (
         <div className="stage-game stage-uetsuke">
             <div className="game-instruction">
-                <p>{isPlanting ? '苗を市松模様に配置しよう！' : '水位を管理しよう！'}</p>
+                <p>{isPlanting ? <><ruby>苗<rt>なえ</rt></ruby>を<ruby>市松<rt>いちまつ</rt></ruby><ruby>模様<rt>もよう</rt></ruby>に<ruby>配置<rt>はいち</rt></ruby>しよう！</> : <><ruby>水位<rt>すいい</rt></ruby>を<ruby>管理<rt>かんり</rt></ruby>しよう！</>}</p>
                 <p className="hint">
                     {isPlanting
-                        ? 'タップで苗を置く/取り除く'
+                        ? <>タップで<ruby>苗<rt>なえ</rt></ruby>を<ruby>置<rt>お</rt></ruby>く/<ruby>取<rt>と</rt></ruby>り<ruby>除<rt>のぞ</rt></ruby>く</>
                         : localDay === 1
-                            ? '深水（3〜4cm）で苗を守ろう'
-                            : '浅水（2〜3cm）で分げつを促そう'
+                            ? <><ruby>深水<rt>ふかみず</rt></ruby>（3〜4cm）で<ruby>苗<rt>なえ</rt></ruby>を<ruby>守<rt>まも</rt></ruby>ろう</>
+                            : <><ruby>浅水<rt>あさみず</rt></ruby>（2〜3cm）で<ruby>分<rt>ぶん</rt></ruby>げつを<ruby>促<rt>うなが</rt></ruby>そう</>
                     }
                 </p>
             </div>
@@ -287,7 +287,7 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                         ))}
                     </div>
                     <p className="plant-count">
-                        配置した苗: {grid.flat().filter(Boolean).length}株
+                        <ruby>配置<rt>はいち</rt></ruby>した<ruby>苗<rt>なえ</rt></ruby>: {grid.flat().filter(Boolean).length}<ruby>株<rt>かぶ</rt></ruby>
                     </p>
                     <Button
                         variant="primary"
@@ -295,7 +295,7 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                         onClick={handlePlantingComplete}
                         disabled={grid.flat().filter(Boolean).length < 5}
                     >
-                        配置完了
+                        <span><ruby>配置<rt>はいち</rt></ruby><ruby>完了<rt>かんりょう</rt></ruby></span>
                     </Button>
                 </>
             ) : (
@@ -311,23 +311,23 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                             <ProgressBar
                                 value={waterLevel}
                                 max={6}
-                                label="水位"
+                                label={<><ruby>水位<rt>すいい</rt></ruby></>}
                                 showValue
                                 color={getWaterColor()}
                                 unit="cm"
                             />
                             <p className="target-info">
-                                目標: {targetWaterLevel.min}〜{targetWaterLevel.max}cm
-                                {localDay === 1 ? '（深水）' : '（浅水）'}
+                                <ruby>目標<rt>もくひょう</rt></ruby>: {targetWaterLevel.min}〜{targetWaterLevel.max}cm
+                                {localDay === 1 ? <>（<ruby>深水<rt>ふかみず</rt></ruby>）</> : <>（<ruby>浅水<rt>あさみず</rt></ruby>）</>}
                             </p>
                         </div>
 
                         <div className="water-controls">
                             <Button variant="secondary" onClick={handleDrainWater}>
-                                ▼ 排水
+                                <span>▼ <ruby>排水<rt>はいすい</rt></ruby></span>
                             </Button>
                             <Button variant="primary" onClick={handleAddWater}>
-                                ▲ 給水
+                                <span>▲ <ruby>給水<rt>きゅうすい</rt></ruby></span>
                             </Button>
                         </div>
                     </div>
@@ -337,7 +337,7 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                         fullWidth
                         onClick={handleDayEnd}
                     >
-                        {localDay < 3 ? '次の日へ' : '次の日へ進む'}
+                        {localDay < 3 ? <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ</span> : <span><ruby>次<rt>つぎ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>へ<ruby>進<rt>すす</rt></ruby>む</span>}
                     </Button>
                 </>
             )}
