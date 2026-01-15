@@ -13,7 +13,7 @@ interface StageProps {
 
 export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
-    const [waterLevel, setWaterLevel] = useState(3.5); // 初期水位
+    const [waterLevel, setWaterLevel] = useState(3); // 初期水位（0-4のレベル: 0=からから, 1=少なめ, 2=適水, 3=深水, 4=深すぎ）
     const [totalScore, setTotalScore] = useState(0);
     const [grid, setGrid] = useState<boolean[][]>(
         Array(5).fill(null).map(() => Array(5).fill(false))
@@ -24,8 +24,8 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
     // ステージ内での経過日数 (1-3)
     const localDay = state.currentDay - 2;
 
-    // 目標水位
-    const targetWaterLevel = localDay === 1 ? { min: 3, max: 4 } : { min: 2, max: 3 };
+    // 目標水位レベル（深水=3、適水=2）
+    const targetWaterLevel = localDay === 1 ? 3 : 2; // Day1: 深水、Day2-3: 適水
 
     // 苗の位置を事前計算（変更しない）
     const seedlingPositions = useMemo(() => {
@@ -176,18 +176,17 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
 
     // 給水
     const handleAddWater = () => {
-        setWaterLevel(prev => Math.min(6, prev + 0.5));
+        setWaterLevel(prev => Math.min(4, prev + 1));
     };
 
     // 排水
     const handleDrainWater = () => {
-        setWaterLevel(prev => Math.max(0, prev - 0.5));
+        setWaterLevel(prev => Math.max(0, prev - 1));
     };
 
-    // 次の日へ
     const handleDayEnd = () => {
         let dayScore = 0;
-        if (waterLevel >= targetWaterLevel.min && waterLevel <= targetWaterLevel.max) {
+        if (waterLevel === targetWaterLevel) {
             dayScore = 5;
             dispatch({ type: 'ADD_QP', amount: 5 });
         } else {
@@ -204,13 +203,25 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
     };
 
     const getWaterColor = () => {
-        if (waterLevel >= targetWaterLevel.min && waterLevel <= targetWaterLevel.max) {
+        if (waterLevel === targetWaterLevel) {
             return 'success';
         }
-        if (waterLevel < 1 || waterLevel > 5) {
+        if (waterLevel === 0 || waterLevel === 4) {
             return 'danger';
         }
         return 'warning';
+    };
+
+    // 水位レベルの表示名を取得
+    const getWaterLevelName = (level: number) => {
+        switch (level) {
+            case 0: return { name: 'からから', emoji: '🏜️' };
+            case 1: return { name: '少なめ', emoji: '💧' };
+            case 2: return { name: '適水', emoji: '💦' };
+            case 3: return { name: '深水', emoji: '🌊' };
+            case 4: return { name: '深すぎ', emoji: '🌊🌊' };
+            default: return { name: '---', emoji: '' };
+        }
     };
 
     // 苗グリッド用のCanvas描画
@@ -258,8 +269,8 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                     {isPlanting
                         ? <>タップで<ruby>苗<rt>なえ</rt></ruby>を<ruby>置<rt>お</rt></ruby>く/<ruby>取<rt>と</rt></ruby>り<ruby>除<rt>のぞ</rt></ruby>く</>
                         : localDay === 1
-                            ? <><ruby>深水<rt>ふかみず</rt></ruby>（3〜4cm）で<ruby>苗<rt>なえ</rt></ruby>を<ruby>守<rt>まも</rt></ruby>ろう</>
-                            : <><ruby>浅水<rt>あさみず</rt></ruby>（2〜3cm）で<ruby>分<rt>ぶん</rt></ruby>げつを<ruby>促<rt>うなが</rt></ruby>そう</>
+                            ? <><ruby>深水<rt>ふかみず</rt></ruby>で<ruby>苗<rt>なえ</rt></ruby>を<ruby>守<rt>まも</rt></ruby>ろう</>
+                            : <><ruby>適水<rt>てきすい</rt></ruby>で<ruby>分<rt>ぶん</rt></ruby>げつを<ruby>促<rt>うなが</rt></ruby>そう</>
                     }
                 </p>
             </div>
@@ -310,15 +321,16 @@ export function Stage2Uetsuke({ onComplete, onNextDay }: StageProps) {
                         <div className="water-gauge">
                             <ProgressBar
                                 value={waterLevel}
-                                max={6}
+                                max={4}
                                 label={<><ruby>水位<rt>すいい</rt></ruby></>}
-                                showValue
+                                showValue={false}
                                 color={getWaterColor()}
-                                unit="cm"
                             />
+                            <p className="water-level-display" style={{ textAlign: 'center', fontSize: '18px', margin: '8px 0' }}>
+                                {getWaterLevelName(waterLevel).emoji} <ruby>{getWaterLevelName(waterLevel).name}<rt>{waterLevel === 2 ? 'てきすい' : waterLevel === 3 ? 'ふかみず' : ''}</rt></ruby>
+                            </p>
                             <p className="target-info">
-                                <ruby>目標<rt>もくひょう</rt></ruby>: {targetWaterLevel.min}〜{targetWaterLevel.max}cm
-                                {localDay === 1 ? <>（<ruby>深水<rt>ふかみず</rt></ruby>）</> : <>（<ruby>浅水<rt>あさみず</rt></ruby>）</>}
+                                <ruby>目標<rt>もくひょう</rt></ruby>: {getWaterLevelName(targetWaterLevel).emoji} <ruby>{getWaterLevelName(targetWaterLevel).name}<rt>{targetWaterLevel === 2 ? 'てきすい' : 'ふかみず'}</rt></ruby>
                             </p>
                         </div>
 

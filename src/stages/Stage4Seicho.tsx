@@ -28,7 +28,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
     const [bugs, setBugs] = useState<Bug[]>([]);
     const [currentEvent, setCurrentEvent] = useState<EventType>(null);
     const [eventHandled, setEventHandled] = useState(false);
-    // 間断かん水用の状態
+    // 地干し（落水）用の状態
     const [waterPhase, setWaterPhase] = useState<'flooded' | 'draining' | 'drained'>('flooded');
     const [drainCycles, setDrainCycles] = useState(0);
 
@@ -208,7 +208,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
         setCurrentEvent(null);
     };
 
-    // 間断かん水（水を抜く）
+    // 地干し（水を抜く）
     const handleDrain = () => {
         if (waterPhase === 'flooded') {
             setWaterPhase('draining');
@@ -216,7 +216,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
         }
     };
 
-    // 間断かん水（水を入れる）
+    // 地干し（水を入れる）
     const handleFlood = () => {
         if (waterPhase === 'drained') {
             setWaterPhase('flooded');
@@ -248,15 +248,13 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
 
     // 次の日へ
     const handleNextDay = () => {
-        // ガスイベントの場合のスコア計算
+        // 地干しイベントの場合のスコア計算
         if (currentEvent === 'gas') {
             let qp = 0;
-            if (drainCycles >= 2) {
-                qp = 10;
-            } else if (drainCycles === 1) {
-                qp = 5;
+            if (drainCycles >= 1) {
+                qp = 10; // 地干し完了
             } else {
-                qp = -5;
+                qp = -5; // 地干しをしなかった
             }
             dispatch({ type: 'ADD_QP', amount: qp });
             setTotalScore(prev => prev + Math.max(0, qp));
@@ -286,7 +284,7 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                 return (
                     <div className="event-card event-net">
                         <h3><ruby>網<rt>あみ</rt></ruby><ruby>上<rt>あ</rt></ruby>げの<ruby>時間<rt>じかん</rt></ruby>！</h3>
-                        <p><ruby>い草<rt>いぐさ</rt></ruby>が<ruby>伸<rt>の</rt></ruby>びてきたよ。<ruby>網<rt>あみ</rt></ruby>を<strong>10cm</strong><ruby>上<rt>あ</rt></ruby>げよう！</p>
+                        <p><ruby>い草<rt>いぐさ</rt></ruby>が<ruby>伸<rt>の</rt></ruby>びてきたよ。<ruby>網<rt>あみ</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さを<ruby>調整<rt>ちょうせい</rt></ruby>しよう！</p>
                         <p className="net-info"><ruby>現在<rt>げんざい</rt></ruby>の<ruby>網<rt>あみ</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さ: {netHeight * 10}cm</p>
                         <div className="net-slider-container">
                             <label><ruby>目標<rt>もくひょう</rt></ruby>の<ruby>高<rt>たか</rt></ruby>さ: {targetNetHeight * 10}cm</label>
@@ -299,9 +297,9 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                 className="net-slider"
                             />
                             <p className="slider-hint">
-                                {targetNetHeight - netHeight === 1 && '✓ Perfect! ぴったり10cm'}
+                                {targetNetHeight - netHeight === 1 && '✓ いい感じ！'}
                                 {targetNetHeight - netHeight === 0 && '⚠ 上げてません'}
-                                {targetNetHeight - netHeight === 2 && '⚠ 20cm上げ（上げすぎ）'}
+                                {targetNetHeight - netHeight === 2 && '⚠ 少し上げすぎかも'}
                                 {targetNetHeight - netHeight > 2 && '⚠ 上げすぎ注意！'}
                                 {targetNetHeight - netHeight < 0 && '✕ 下げないで！'}
                             </p>
@@ -371,33 +369,15 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
             case 'gas':
                 return (
                     <div className="event-card event-gas">
-                        <h3 style={{ marginBottom: '4px' }}>ガス<ruby>発生<rt>はっせい</rt></ruby>！<ruby>間断<rt>かんだん</rt></ruby>かん<ruby>水<rt>すい</rt></ruby>をしよう</h3>
+                        <h3 style={{ marginBottom: '4px' }}><ruby>地<rt>じ</rt></ruby><ruby>干<rt>ぼ</rt></ruby>しをしよう</h3>
                         <p style={{ fontSize: '11px', color: '#666', margin: '0 0 8px 0' }}>
-                            <ruby>田<rt>た</rt></ruby>んぼの<ruby>水<rt>みず</rt></ruby>を<ruby>抜<rt>ぬ</rt></ruby>いて<ruby>乾<rt>かわ</rt></ruby>かし、また<ruby>水<rt>みず</rt></ruby>を<ruby>入<rt>い</rt></ruby>れる。<ruby>根<rt>ね</rt></ruby>に<ruby>酸素<rt>さんそ</rt></ruby>を<ruby>供給<rt>きょうきゅう</rt></ruby>してガスを<ruby>抜<rt>ぬ</rt></ruby>きます。
+                            <ruby>水<rt>みず</rt></ruby>が<ruby>長<rt>なが</rt></ruby>く<ruby>続<rt>つづ</rt></ruby>くと<ruby>土<rt>つち</rt></ruby>に<ruby>空気<rt>くうき</rt></ruby>がなくなるよ。<ruby>落水<rt>らくすい</rt></ruby>して<ruby>土<rt>つち</rt></ruby>に<ruby>空気<rt>くうき</rt></ruby>を<ruby>入<rt>い</rt></ruby>れよう！
                         </p>
                         <div className={`water-field water-${waterPhase}`} style={{ height: '60px', margin: '8px 0' }}>
-                            <div className="gas-bubbles-container">
-                                {drainCycles < 1 && (
-                                    <>
-                                        <div className="gas-particle p1" />
-                                        <div className="gas-particle p2" />
-                                        <div className="gas-particle p3" />
-                                        <div className="gas-particle p4" />
-                                        <div className="gas-particle p5" />
-                                    </>
-                                )}
-                                {drainCycles < 2 && (
-                                    <>
-                                        <div className="gas-particle p6" />
-                                        <div className="gas-particle p7" />
-                                        <div className="gas-particle p8" />
-                                    </>
-                                )}
-                            </div>
                             <p className="water-status" style={{ fontSize: '14px', margin: '4px 0 0 0', fontWeight: 'bold' }}>
-                                {waterPhase === 'flooded' && <><ruby>水<rt>みず</rt></ruby>あり</>}
-                                {waterPhase === 'draining' && <><ruby>排水<rt>はいすい</rt></ruby><ruby>中<rt>ちゅう</rt></ruby>...</>}
-                                {waterPhase === 'drained' && <><ruby>乾燥<rt>かんそう</rt></ruby></>}
+                                {waterPhase === 'flooded' && <><ruby>水<rt>みず</rt></ruby>あり 💧</>}
+                                {waterPhase === 'draining' && <><ruby>落水<rt>らくすい</rt></ruby><ruby>中<rt>ちゅう</rt></ruby>...</>}
+                                {waterPhase === 'drained' && <><ruby>乾燥<rt>かんそう</rt></ruby> ☀️</>}
                             </p>
                         </div>
                         <div className="water-controls" style={{ marginBottom: '8px' }}>
@@ -405,23 +385,23 @@ export function Stage4Seicho({ onComplete, onNextDay }: StageProps) {
                                 variant="secondary"
                                 size="small"
                                 onClick={handleDrain}
-                                disabled={waterPhase !== 'flooded' || drainCycles >= 2}
+                                disabled={waterPhase !== 'flooded' || drainCycles >= 1}
                             >
-                                <span><ruby>抜<rt>ぬ</rt></ruby>く</span>
+                                <span>💧 <ruby>落水<rt>らくすい</rt></ruby></span>
                             </Button>
                             <Button
                                 variant="primary"
                                 size="small"
                                 onClick={handleFlood}
-                                disabled={waterPhase !== 'drained' || drainCycles >= 2}
+                                disabled={waterPhase !== 'drained' || drainCycles >= 1}
                             >
-                                <span><ruby>入<rt>い</rt></ruby>れる</span>
+                                <span>🌊 <ruby>給水<rt>きゅうすい</rt></ruby></span>
                             </Button>
                         </div>
                         <p style={{ margin: '4px 0' }}>
-                            {drainCycles >= 2
-                                ? <>✓ ガス<ruby>抜<rt>ぬ</rt></ruby>き<ruby>完了<rt>かんりょう</rt></ruby>！</>
-                                : `サイクル: ${drainCycles}/2回`}
+                            {drainCycles >= 1
+                                ? <>✓ <ruby>地干<rt>じぼ</rt></ruby>し<ruby>完了<rt>かんりょう</rt></ruby>！<ruby>土<rt>つち</rt></ruby>に<ruby>空気<rt>くうき</rt></ruby>が<ruby>入<rt>はい</rt></ruby>ったよ</>
+                                : <><ruby>落水<rt>らくすい</rt></ruby>ボタンを<ruby>押<rt>お</rt></ruby>して<ruby>地干<rt>じぼ</rt></ruby>しをしよう！</>}
                         </p>
                         {/* 完了ボタン削除: 次の日へボタンで進行 */}
                     </div>

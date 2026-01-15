@@ -127,7 +127,7 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
 
         dispatch({ type: 'ADD_QP', amount: qp });
         setTotalScore(prev => prev + Math.max(0, qp));
-        // 密度上限なし、バランス調整で8000本前後を目指す
+        // 密度上限なし、バランス調整で7000本前後を目指す
         setDensity(prev => Math.max(0, prev + densityChange));
         setWeavingCount(prev => prev + 1);
         setCurrentDirection(prev => prev === 'left' ? 'right' : 'left');
@@ -146,12 +146,12 @@ export function Stage7Seishoku({ onComplete, onNextDay }: StageProps) {
     };
 
     const getIgusaByCount = () => {
-        // 密度(%)から本数を計算（最大8000本）
-        // density 50(初期) -> 6000本
-        // density 100(MAX) -> 8000本
+        // 密度(%)から本数を計算（最大7000本）
+        // density 50(初期) -> 5500本
+        // density 100(MAX) -> 7000本
         // density 0 -> 4000本
         const base = 4000;
-        const additional = Math.floor((density / 100) * 4000);
+        const additional = Math.floor((density / 100) * 3000);
         const count = base + additional;
         return <>{count.toLocaleString()}<ruby>本<rt>ほん</rt></ruby></>;
     };
