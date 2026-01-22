@@ -61,7 +61,19 @@ npm run preview  # ビルドプレビュー
 npm run deploy   # GitHub Pagesにデプロイ
 ```
 
-## 🐛 デバッグモード
+## Google Analytics 設定
+
+本番環境でアクセス解析を有効にするには、`.env` ファイルを作成してください。
+
+```bash
+# .env.example をコピー
+cp .env.example .env
+
+# .env を編集して測定IDを設定
+# VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+##�🐛 デバッグモード
 
 開発・テスト用に、任意のステージへジャンプできる機能があります。
 
