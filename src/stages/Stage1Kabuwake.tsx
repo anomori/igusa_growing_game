@@ -20,17 +20,17 @@ interface SproutPosition {
 export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
     const { state, dispatch } = useGame();
     const [sprouts] = useState<SproutPosition[]>(() => {
-        // 解けるように、3〜4本（うち新芽1本）のグループを生成して結合する
         const generatedSprouts: SproutPosition[] = [];
         const numGroups = 10; // カット回数と同じ数だけグループを作る
 
+        // まず各苗の性質（新芽かどうか等）の配列を作る
+        const sproutAttributes: { isNewShoot: boolean; rotation: number; height: number }[] = [];
         for (let i = 0; i < numGroups; i++) {
             const groupSize = Math.random() < 0.5 ? 3 : 4; // 3本か4本
             const newShootIndex = Math.floor(Math.random() * groupSize); // グループ内のどこか1本を新芽にする
 
             for (let j = 0; j < groupSize; j++) {
-                generatedSprouts.push({
-                    x: 0, // あとで再計算
+                sproutAttributes.push({
                     isNewShoot: j === newShootIndex,
                     rotation: (Math.random() - 0.5) * 10,
                     height: 18 + Math.random() * 8, // 18-26px
@@ -38,13 +38,27 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
             }
         }
 
-        // 全体の幅に合わせてx座標を割り振る
-        // 密度を高めるため、親要素の幅(CSS)も調整するが、ここでは相対位置(%)を決める
-        const totalSprouts = generatedSprouts.length;
-        return generatedSprouts.map((s, i) => ({
-            ...s,
-            x: 2 + (i * (96 / totalSprouts)) // 2%〜98%の範囲に均等配置
-        }));
+        const totalSprouts = sproutAttributes.length;
+
+        // 全体のスペースに均等に配置する
+        for (let i = 0; i < totalSprouts; i++) {
+            const margin = 2;
+            const availableWidth = 100 - margin * 2;
+            const step = availableWidth / Math.max(1, totalSprouts - 1);
+
+            const baseX = margin + i * step;
+            // 少しだけランダムなずれを入れる（隣と重なりすぎない程度）
+            const jitter = (Math.random() - 0.5) * (step * 0.8);
+
+            generatedSprouts.push({
+                x: baseX + jitter,
+                isNewShoot: sproutAttributes[i].isNewShoot,
+                rotation: sproutAttributes[i].rotation,
+                height: sproutAttributes[i].height,
+            });
+        }
+
+        return generatedSprouts;
     });
     const [cutLines, setCutLines] = useState<number[]>([]);
     // resultsの型を変更: hitNewShoot(boolean) -> newShootCount(number)
@@ -147,13 +161,11 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
     }, [drawCanvas]);
 
     const targetCuts = 10;
+    const isLastCut = cutLines.length === targetCuts - 1; // 次が最後のカット
 
-    // スライダー操作時にスクロール
+    // スライダー操作時
     const handleSliderChange = (val: number) => {
         setCurrentSection([currentSection[0], val]);
-
-        // スクロール処理は廃止
-        // if (containerRef.current) ...
     };
 
     // 切り分ける位置を選択
@@ -163,8 +175,8 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         const newCutLines = [...cutLines, position].sort((a, b) => a - b);
         setCutLines(newCutLines);
 
-        // 現在のセクションを計算
-        const sectionStart = cutLines.length > 0 ? cutLines[cutLines.length - 1] : 0;
+        // 現在のセクションを計算（newCutLinesを使って正確な開始位置を取得）
+        const sectionStart = currentSection[0];
         const sectionEnd = position;
 
         // このセクション内の苗の数を数える
@@ -175,30 +187,20 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
         const newShootCount = sproutsInSection.filter(s => s.isNewShoot).length;
 
         const result = { count, newShootCount };
-        setResults([...results, result]);
 
         // QP計算
         let qpChange = 0;
 
-        // Logic update:
-        // 1. New Shoot >= 1:
-        //    - Count 3-4: Perfect (+10)
-        //    - Count 2 or 5: Good (+5)
-        //    - Else: Miss (-5)
-        // 2. New Shoot == 0:
-        //    - Count 2-3: OK/Good (+5)
-        //    - Else: Miss (-5)
-
         if (newShootCount >= 1) {
             if (count >= 3 && count <= 4) {
                 qpChange = 10;
-            } else if (count >= 2 && count <= 5) { // Relaxed slightly to include 2-5 range for Good
+            } else if (count >= 2 && count <= 5) {
                 qpChange = 5;
             } else {
                 qpChange = -5;
             }
         } else {
-            // No new shoot
+            // 新芽なし
             if (count >= 2 && count <= 3) {
                 qpChange = 5; // OK
             } else {
@@ -208,18 +210,34 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
 
         dispatch({ type: 'ADD_QP', amount: qpChange });
 
-        // 次のセクションを設定（初期値を少し進める）
-        const remainingWidth = 100 - position;
+        // position より右に残っている苗の数を確認
         const remainingCuts = targetCuts - newCutLines.length;
-        const nextStep = remainingCuts > 0 ? remainingWidth / remainingCuts : 10;
+        const sproutsRemaining = sprouts.filter(s => s.x >= position).length;
 
+        if (remainingCuts <= 0 || sproutsRemaining === 0) {
+            // 苗がもう残っていない → 残りカット分を空セクション(ミス)として自動処理
+            const autoResults: { count: number; newShootCount: number }[] = [];
+            let totalAutoQp = 0;
+            for (let i = 0; i < remainingCuts; i++) {
+                autoResults.push({ count: 0, newShootCount: 0 });
+                totalAutoQp -= 5;
+            }
+            setResults(prev => [...prev, result, ...autoResults]);
+            if (totalAutoQp < 0) {
+                dispatch({ type: 'ADD_QP', amount: totalAutoQp });
+            }
+            setIsComplete(true);
+            return;
+        }
+
+        // 通常パス: results に追加してスライダー更新
+        setResults(prev => [...prev, result]);
+
+        // 残りカット数で均等に割った次の目標位置
+        const remainingWidth = 100 - position;
+        const nextStep = remainingWidth / remainingCuts;
         const nextTarget = Math.min(100, position + nextStep);
         setCurrentSection([position, nextTarget]);
-
-        // 完了チェック
-        if (newCutLines.length >= targetCuts) {
-            setIsComplete(true);
-        }
     };
 
     const getTotalScore = () => {
@@ -268,7 +286,7 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                 <canvas ref={igusaCanvasRef} style={{ width: '100%', height: '100%' }} />
             </div>
 
-            {!isComplete && (
+            {!isComplete && !isLastCut && (
                 <div className="cut-selector-container">
                     <div className="cut-selector">
                         <input
@@ -282,6 +300,11 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                         />
                     </div>
                     <p className="slider-instruction">スライダーを<ruby>動<rt>うご</rt></ruby>かして<ruby>位置<rt>いち</rt></ruby>を<ruby>調整<rt>ちょうせい</rt></ruby> →</p>
+                </div>
+            )}
+            {!isComplete && isLastCut && (
+                <div className="cut-selector-container">
+                    <p className="slider-instruction" style={{ textAlign: 'center', color: '#2e7d32', fontWeight: 'bold' }}>🌾 最後のひと切り！残りをすべてまとめます</p>
                 </div>
             )}
 
@@ -303,8 +326,8 @@ export function Stage1Kabuwake({ onComplete, onNextDay }: StageProps) {
                 <Button
                     variant="primary"
                     fullWidth
-                    onClick={() => handleCut(currentSection[1])}
-                    disabled={currentSection[1] <= currentSection[0] + 5}
+                    onClick={() => handleCut(isLastCut ? 100 : currentSection[1])}
+                    disabled={!isLastCut && currentSection[1] < currentSection[0] + 0.2}
                 >
                     <span><ruby>切<rt>き</rt></ruby>り<ruby>分<rt>わ</rt></ruby>ける！</span>
                 </Button>
